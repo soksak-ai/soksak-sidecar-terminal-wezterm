@@ -1,0 +1,55 @@
+# soksak-sidecar-terminal-wezterm — terminal-domain sidecar (wezterm-term VT engine).
+# Second engine unit for the contract soksak-spec-sidecar-terminal (canonical text
+# in the soksak-contract-terminal repo's SPEC.md). The core does not link
+# this crate: it consumes the daemon's documented wire (soksak-pty-proto framing,
+# reimplemented here) and serves terminal plugins over a rendezvous socket. The
+# engine name lives in this unit's name only; the contract is engine-neutral.
+[package]
+name = "soksak-sidecar-terminal-wezterm"
+version = "0.0.1"
+edition = "2021"
+publish = false
+description = "Terminal-domain restore sidecar on the wezterm-term VT engine: mirrors PTY session output into screen state (scrollback, alt-screen, private modes), serializes it into replayable paint for warm/cold restore, and checkpoints sealed plaintext through the core PTY daemon."
+
+[lib]
+name = "soksak_sidecar_terminal_wezterm"
+path = "src/lib.rs"
+
+# The survival service — subscribes to the daemon tees, checkpoints the mirrors,
+# and serves restore over the identity-home rendezvous socket. resolve_sidecar_cmd
+# stages dist/soksak-sidecar-terminal-wezterm (stage.sh).
+[[bin]]
+name = "soksak-sidecar-terminal-wezterm"
+path = "src/main.rs"
+
+[dependencies]
+# Restore engine — the wezterm-term VT model (parser + grid + scrollback + modes),
+# the sole engine seat behind the engine module. wezterm does not publish its VT
+# crates to crates.io, so they come from our fork of wezterm (soksak-ai/wezterm, MIT,
+# © Wez Furlong; attribution in THIRD-PARTY-NOTICES) pinned to one rev. That fork adds
+# three patches over wezterm upstream: a headless embedding API (threaded_writer opt-out,
+# advance_bytes_observed, screen line() accessor); a DECAWM fix so a double-width grapheme
+# that does not fit before the right margin wraps instead of packing into the last column
+# (the unpatched crate packs it, claiming 81 columns in an 80-column grid); and a cell that
+# carries true color by value instead of a per-cell heap allocation. term and termwiz come
+# from the same rev, so the cell/color/attribute and Action types unify without a patch.
+wezterm-term = { git = "https://github.com/soksak-ai/wezterm", rev = "eebf29473eb5b7a07c9cb5c833d42fa90fb00777" }
+termwiz = { git = "https://github.com/soksak-ai/wezterm", rev = "eebf29473eb5b7a07c9cb5c833d42fa90fb00777" }
+# Wire — the daemon speaks NDJSON + base64 payloads; this unit reimplements the
+# documented shape (proto module) rather than linking the core crate.
+serde_json = "1"
+base64 = "0.22"
+# Redirect the survival service's own stderr to a home log (dup2) — the plugin
+# spawns it over a stdio Channel that drops stderr, so checkpoint failures would
+# be invisible. Unix-only survival service; the daemon logs the same way.
+libc = "0.2"
+
+[dev-dependencies]
+# The contract and its acceptance suite: the corpus, the declared goldens, and the assertions.
+# It has no engine of its own — the standard is the declared screen state, not what any
+# implementation does. Dev-only: nothing from it ships.
+soksak-contract-terminal = { git = "https://github.com/soksak-ai/soksak-contract-terminal.git", rev = "f2713250487fd6461e3e742bc27cde25dbabb548" }
+
+# Independent workspace — separate from the core (src-tauri) workspace (a member
+# must live under its workspace root, so a sibling directory cannot join core's).
+[workspace]
