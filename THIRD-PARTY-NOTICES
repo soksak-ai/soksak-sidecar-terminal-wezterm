@@ -1,0 +1,46 @@
+THIRD-PARTY NOTICES
+===================
+
+Licensing is per-unit: this unit (soksak-sidecar-terminal-wezterm) ships the
+wezterm-term VT engine and therefore carries its MIT license (see LICENSE). A
+different engine unit implementing the same contract
+(soksak-spec-sidecar-terminal@1) carries its own engine's license — no license
+crosses between units. The suite that grades this unit is
+owned by the contract repo and is a dev-dependency; nothing from it ships here.
+
+
+wezterm-term  (the restore engine — MIT)
+----------------------------------------
+
+The headless terminal model (parser, grid, scrollback, modes) is the
+`wezterm-term` crate from the WezTerm terminal emulator. WezTerm does not publish
+`wezterm-term` to crates.io, so this unit consumes them
+from a fork of WezTerm (soksak-ai/wezterm) pinned to one commit, carrying the same MIT
+license and attribution.
+
+  Homepage:  https://github.com/wezterm/wezterm
+  Fork:      https://github.com/soksak-ai/wezterm
+  License:   MIT
+
+  Copyright (c) 2018 Wez Furlong
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+
+  The full MIT text is in the LICENSE file at the root of this repository.
+
