@@ -5,8 +5,9 @@
 //! 데몬 wire 소비는 엔진-불가지다(바이트만 나른다) — wezterm 엔진 교체와 무관하다.
 
 use std::io::{self, BufRead, BufReader, Read, Write};
-use std::os::unix::net::UnixStream;
 use std::path::Path;
+
+use interprocess::local_socket::{prelude::*, GenericFilePath, RecvHalf, SendHalf, Stream};
 
 use base64::engine::general_purpose::STANDARD as B64;
 use base64::Engine as _;
@@ -41,8 +42,8 @@ pub struct SessionInfo {
 /// control 소켓 클라이언트 — hello 후 NDJSON 요청/응답. 사이드카가 쓰는 요청만
 /// 타입 헬퍼로 감싼다; 임의 요청은 [`ControlClient::request`] 로 보낸다(통합 드라이버용).
 pub struct ControlClient {
-    stream: UnixStream,
-    reader: BufReader<UnixStream>,
+    writer: SendHalf,
+    reader: BufReader<RecvHalf>,
 }
 
 impl ControlClient {
@@ -51,11 +52,12 @@ impl ControlClient {
     pub fn connect(home: &Path) -> io::Result<Self> {
         let token = read_token(home)?;
         let path = proto::control_socket_path(home);
-        let stream = UnixStream::connect(&path).map_err(|e| {
+        let name = path.as_os_str().to_fs_name::<GenericFilePath>()?;
+        let stream = Stream::connect(name).map_err(|e| {
             other(format!("cannot reach daemon control socket {}: {e}", path.display()))
         })?;
-        let reader = BufReader::new(stream.try_clone()?);
-        let mut c = ControlClient { stream, reader };
+        let (recv, send) = stream.split();
+        let mut c = ControlClient { writer: send, reader: BufReader::new(recv) };
         c.send_line(&proto::hello(&token, None, false))?;
         let reply = c.read_reply()?;
         proto::require_ok(&reply).map_err(other)?;
@@ -65,8 +67,8 @@ impl ControlClient {
     fn send_line(&mut self, v: &Value) -> io::Result<()> {
         let mut line = serde_json::to_vec(v)?;
         line.push(b'\n');
-        self.stream.write_all(&line)?;
-        self.stream.flush()
+        self.writer.write_all(&line)?;
+        self.writer.flush()
     }
 
     fn read_reply(&mut self) -> io::Result<Value> {
@@ -131,9 +133,11 @@ impl ControlClient {
 pub fn block_until_daemon_dies(home: &Path) -> io::Result<()> {
     let token = read_token(home)?;
     let path = proto::control_socket_path(home);
-    let stream = UnixStream::connect(&path)?;
-    let mut writer = stream.try_clone()?;
-    let mut reader = BufReader::new(stream);
+    let name = path.as_os_str().to_fs_name::<GenericFilePath>()?;
+    let stream = Stream::connect(name)?;
+    let (recv, send) = stream.split();
+    let mut writer = send;
+    let mut reader = BufReader::new(recv);
     let mut line = serde_json::to_vec(&proto::hello(&token, None, false))?;
     line.push(b'\n');
     writer.write_all(&line)?;
@@ -161,7 +165,10 @@ pub enum TeeFrame {
 
 /// stream 소켓 tee 구독 — hello{subscribe} 후 length-prefixed 프레임을 EOF 까지 읽는다.
 pub struct TeeStream {
-    reader: BufReader<UnixStream>,
+    reader: BufReader<RecvHalf>,
+    // The send half is unused after the subscribe hello, but holding it keeps the
+    // connection's write side open so the split does not shut it down early.
+    _writer: SendHalf,
     session: u64,
     // 구독 시점의 데몬 링 head(ack.startSeq) — 소비자 consumed_seq 의 정확한 기점. 이후
     // 프레임 길이만큼 전진하면 좌표가 데몬 링과 정합한다(warm 핸드오프, SPEC §6.4).
@@ -176,11 +183,13 @@ impl TeeStream {
     pub fn subscribe(home: &Path, session: u64) -> io::Result<Self> {
         let token = read_token(home)?;
         let path = proto::stream_socket_path(home);
-        let stream = UnixStream::connect(&path).map_err(|e| {
+        let name = path.as_os_str().to_fs_name::<GenericFilePath>()?;
+        let stream = Stream::connect(name).map_err(|e| {
             other(format!("cannot reach daemon stream socket {}: {e}", path.display()))
         })?;
-        let mut writer = stream.try_clone()?;
-        let mut reader = BufReader::new(stream);
+        let (recv, send) = stream.split();
+        let mut writer = send;
+        let mut reader = BufReader::new(recv);
         // hello{subscribe:true, session} → ack 1줄(NDJSON) → 이후 프레임.
         let mut line = serde_json::to_vec(&proto::hello(&token, Some(session), true))?;
         line.push(b'\n');
@@ -202,7 +211,7 @@ impl TeeStream {
             .and_then(|v| v.as_str())
             .and_then(|s| B64.decode(s).ok())
             .unwrap_or_default();
-        Ok(TeeStream { reader, session, start_seq, seed })
+        Ok(TeeStream { reader, _writer: writer, session, start_seq, seed })
     }
 
     pub fn session(&self) -> u64 {

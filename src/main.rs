@@ -126,15 +126,29 @@ fn main() {
 // 포함)이 사라진다. 데몬(코어가 stderr→ptyd-p<N>.log 로 리다이렉트)과 동형의 관측면. 열기
 // 실패는 치명 아님 — 원래 stderr 로 계속 간다(무음 대신 최선).
 fn redirect_stderr_to_log(home: &std::path::Path) {
-    use std::os::unix::io::AsRawFd;
     let path = soksak_sidecar_terminal_wezterm::proto::service_log_path(home);
     if let Some(dir) = path.parent() {
         let _ = std::fs::create_dir_all(dir);
     }
-    if let Ok(f) = std::fs::OpenOptions::new().create(true).append(true).open(&path) {
-        // dup2 로 fd 2 를 로그로 대체. 파일 핸들은 fd 를 살려두려 leak(프로세스 수명 = fd 수명).
+    let Ok(f) = std::fs::OpenOptions::new().create(true).append(true).open(&path) else {
+        return;
+    };
+    // Replace the process's stderr (fd 2 / STD_ERROR_HANDLE) with the log. The handle is
+    // leaked so it lives for the process lifetime. The syscall is platform-specific.
+    #[cfg(unix)]
+    {
+        use std::os::unix::io::AsRawFd;
         unsafe {
             libc::dup2(f.as_raw_fd(), 2);
+        }
+        std::mem::forget(f);
+    }
+    #[cfg(windows)]
+    {
+        use std::os::windows::io::AsRawHandle;
+        use windows_sys::Win32::System::Console::{SetStdHandle, STD_ERROR_HANDLE};
+        unsafe {
+            SetStdHandle(STD_ERROR_HANDLE, f.as_raw_handle() as _);
         }
         std::mem::forget(f);
     }
