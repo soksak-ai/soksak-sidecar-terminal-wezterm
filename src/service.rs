@@ -10,7 +10,9 @@
 
 use std::collections::HashMap;
 use std::io::{self, BufRead, BufReader, Write};
-use std::os::unix::net::{UnixListener, UnixStream};
+use interprocess::local_socket::{
+    prelude::*, GenericFilePath, Listener, ListenerOptions, RecvHalf, SendHalf, Stream,
+};
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Condvar, Mutex};
 use std::time::Instant;
@@ -217,7 +219,7 @@ fn checkpoint_loop(cell: Arc<SessionCell>, ckpt_control: Arc<Mutex<ControlClient
 // ── 서버 ─────────────────────────────────────────────────────────────────────
 
 /// 서비스 소켓 accept 루프 — 연결마다 hello 판정 후 요청을 처리. 블로킹, 스레드/연결.
-pub fn serve(listener: UnixListener, ctx: SpawnCtx, token: String) {
+pub fn serve(listener: Listener, ctx: SpawnCtx, token: String) {
     for conn in listener.incoming().flatten() {
         let ctx = ctx.clone();
         let token = token.clone();
@@ -229,9 +231,10 @@ pub fn serve(listener: UnixListener, ctx: SpawnCtx, token: String) {
     }
 }
 
-fn handle_conn(conn: UnixStream, ctx: &SpawnCtx, token: &str) -> io::Result<()> {
-    let mut writer = conn.try_clone()?;
-    let mut reader = BufReader::new(conn);
+fn handle_conn(conn: Stream, ctx: &SpawnCtx, token: &str) -> io::Result<()> {
+    let (recv, send) = conn.split();
+    let mut writer = send;
+    let mut reader = BufReader::new(recv);
 
     // hello 선행 — version/token 판정. 불일치는 loud 거절.
     let mut hello_line = String::new();
@@ -416,7 +419,10 @@ fn err(code: &str, message: &str) -> Value {
 /// 계약당 엔진 유닛 하나만 돈다(데몬 싱글턴 동형). 죽은 소켓 파일은 재바인드 위해 제거.
 pub fn singleton_taken(home: &Path) -> bool {
     let path = proto::service_socket_path(home);
-    if UnixStream::connect(&path).is_ok() {
+    let Ok(name) = path.as_os_str().to_fs_name::<GenericFilePath>() else {
+        return false;
+    };
+    if Stream::connect(name).is_ok() {
         return true;
     }
     let _ = std::fs::remove_file(&path);
@@ -425,11 +431,12 @@ pub fn singleton_taken(home: &Path) -> bool {
 
 /// 서비스 소켓 바인드(싱글턴 프로브 후). run 디렉토리는 데몬이 이미 만든다 —
 /// 없으면 만든다(멱등).
-pub fn bind_service(home: &Path) -> io::Result<UnixListener> {
+pub fn bind_service(home: &Path) -> io::Result<Listener> {
     let dir = proto::run_dir(home);
     std::fs::create_dir_all(&dir)?;
     let path = proto::service_socket_path(home);
-    UnixListener::bind(&path)
+    let name = path.as_os_str().to_fs_name::<GenericFilePath>()?;
+    ListenerOptions::new().name(name).create_sync()
 }
 
 // ── 클라이언트(플러그인/하니스 소비면) ───────────────────────────────────────
@@ -437,21 +444,22 @@ pub fn bind_service(home: &Path) -> io::Result<UnixListener> {
 /// 서비스 소켓 클라이언트 — hello 후 rehydrate/coldPaint/status. 사이드카 미가동이면
 /// connect 가 명시 에러(무음·행 아님) — RED 의 대상.
 pub struct ServiceClient {
-    stream: UnixStream,
-    reader: BufReader<UnixStream>,
+    writer: SendHalf,
+    reader: BufReader<RecvHalf>,
 }
 
 impl ServiceClient {
     pub fn connect(home: &Path, token: &str) -> io::Result<Self> {
         let path = proto::service_socket_path(home);
-        let stream = UnixStream::connect(&path).map_err(|e| {
+        let name = path.as_os_str().to_fs_name::<GenericFilePath>()?;
+        let stream = Stream::connect(name).map_err(|e| {
             io::Error::new(
                 e.kind(),
                 format!("no terminal sidecar at {}: {e}", path.display()),
             )
         })?;
-        let reader = BufReader::new(stream.try_clone()?);
-        let mut c = ServiceClient { stream, reader };
+        let (recv, send) = stream.split();
+        let mut c = ServiceClient { writer: send, reader: BufReader::new(recv) };
         c.send(&json!({ "version": proto::PTYD_PROTOCOL_VERSION, "token": token }))?;
         let reply = c.recv()?;
         proto::require_ok(&reply)
@@ -462,8 +470,8 @@ impl ServiceClient {
     fn send(&mut self, v: &Value) -> io::Result<()> {
         let mut line = serde_json::to_vec(v)?;
         line.push(b'\n');
-        self.stream.write_all(&line)?;
-        self.stream.flush()
+        self.writer.write_all(&line)?;
+        self.writer.flush()
     }
 
     fn recv(&mut self) -> io::Result<Value> {

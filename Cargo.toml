@@ -6,7 +6,7 @@
 # engine name lives in this unit's name only; the contract is engine-neutral.
 [package]
 name = "soksak-sidecar-terminal-wezterm"
-version = "0.0.1"
+version = "0.0.2"
 edition = "2021"
 publish = false
 description = "Terminal-domain restore sidecar on the wezterm-term VT engine: mirrors PTY session output into screen state (scrollback, alt-screen, private modes), serializes it into replayable paint for warm/cold restore, and checkpoints sealed plaintext through the core PTY daemon."
@@ -39,10 +39,20 @@ termwiz = { git = "https://github.com/soksak-ai/wezterm", rev = "eebf29473eb5b7a
 # documented shape (proto module) rather than linking the core crate.
 serde_json = "1"
 base64 = "0.22"
-# Redirect the survival service's own stderr to a home log (dup2) — the plugin
-# spawns it over a stdio Channel that drops stderr, so checkpoint failures would
-# be invisible. Unix-only survival service; the daemon logs the same way.
+# Cross-platform local-socket IPC — the rendezvous socket this unit serves and the
+# daemon control/stream sockets it consumes. interprocess dispatches to Unix domain
+# sockets on Unix and named pipes on Windows behind one API, inserting no framing of its
+# own, so the NDJSON + length-prefixed tee protocol is byte-for-byte unchanged.
+interprocess = "2"
+
+# Redirect the survival service's own stderr to a home log so checkpoint failures are
+# visible (the plugin spawns it over a stdio Channel that drops stderr). The redirect is
+# a platform-specific syscall: dup2 on Unix, SetStdHandle on Windows.
+[target.'cfg(unix)'.dependencies]
 libc = "0.2"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = ["Win32_System_Console", "Win32_Foundation"] }
 
 [dev-dependencies]
 # The contract and its acceptance suite: the corpus, the declared goldens, and the assertions.
