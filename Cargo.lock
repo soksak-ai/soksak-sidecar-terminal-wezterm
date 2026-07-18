@@ -1593,7 +1593,7 @@ source = "git+https://github.com/soksak-ai/soksak-contract-terminal.git?rev=f271
 
 [[package]]
 name = "soksak-sidecar-terminal-wezterm"
-version = "0.0.2"
+version = "0.0.3"
 dependencies = [
  "base64",
  "interprocess",
