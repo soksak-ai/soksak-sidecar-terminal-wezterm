@@ -1588,8 +1588,8 @@ checksum = "8ed6a63f02c8539c91a8685a86f4099661ba3da017932f6ebbea6de3f0fa7c90"
 
 [[package]]
 name = "soksak-contract-terminal"
-version = "0.1.0"
-source = "git+https://github.com/soksak-ai/soksak-contract-terminal.git?rev=f2713250487fd6461e3e742bc27cde25dbabb548#f2713250487fd6461e3e742bc27cde25dbabb548"
+version = "0.0.1"
+source = "git+https://github.com/soksak-ai/soksak-contract-terminal.git?rev=3eb8debde6ba273b37f3d0f141e9deb074b0fadc#3eb8debde6ba273b37f3d0f141e9deb074b0fadc"
 
 [[package]]
 name = "soksak-sidecar-terminal-wezterm"

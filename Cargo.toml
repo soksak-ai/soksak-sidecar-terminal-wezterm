@@ -58,7 +58,7 @@ windows-sys = { version = "0.59", features = ["Win32_System_Console", "Win32_Fou
 # The contract and its acceptance suite: the corpus, the declared goldens, and the assertions.
 # It has no engine of its own — the standard is the declared screen state, not what any
 # implementation does. Dev-only: nothing from it ships.
-soksak-contract-terminal = { git = "https://github.com/soksak-ai/soksak-contract-terminal.git", rev = "f2713250487fd6461e3e742bc27cde25dbabb548" }
+soksak-contract-terminal = { git = "https://github.com/soksak-ai/soksak-contract-terminal.git", rev = "3eb8debde6ba273b37f3d0f141e9deb074b0fadc" }
 
 # Independent workspace — separate from the core (src-tauri) workspace (a member
 # must live under its workspace root, so a sibling directory cannot join core's).
