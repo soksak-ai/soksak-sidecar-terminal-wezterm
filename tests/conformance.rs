@@ -42,6 +42,14 @@ fn dec_line_drawing() {
     contract::assert_conforms::<Unit>(Fixture::DecLineDrawing);
 }
 
+// resize→rehydrate 폭 정합(공유 단언) — 코어 resize 는 데몬 PTY 만 바꾸고 미러엔 전파 안 되므로 kit 이
+// rehydrate 직전(그리고 리사이즈마다) 미러를 pane 폭으로 맞춘다. 그 전제(다른 폭 resize 후 rehydrate 가
+// 왕복 충실·내용 보존)를 계약이 못박고, 각 엔진은 여기서 한 줄로 부른다 — 개별 엔진에 복붙하지 않는다.
+#[test]
+fn resize_reflow() {
+    contract::assert_resize_reflow::<Unit>();
+}
+
 // 골든 부트스트랩 — 이 엔진이 코퍼스를 어떻게 해석하는지 정규형 텍스트로 뱉는다. 골든이 아니라
 // **후보**다: 엔진끼리 대조하고 VT 스펙으로 판정한 뒤에만 계약의 골든이 된다(SPEC.md §12).
 // 평시 시험에 끼지 않는다(#[ignore]).
