@@ -13,13 +13,13 @@ mod common;
 #[ignore]
 fn bench() {
     let report = soksak_contract_terminal::bench::run::<common::Unit>("wezterm");
-    println!("{}", report.to_line());
+    println!("{}", report.to_json());
     // 기록이 판정보다 먼저다. 떨어진 유닛의 숫자야말로 표에 가장 있어야 할 숫자인데, 판정을
     // 먼저 하면 그 유닛은 아무 기록도 남기지 못하고 사라진다.
     if let Ok(dir) = std::env::var("SOKSAK_BENCH_OUT") {
         let dir = std::path::PathBuf::from(dir);
         std::fs::create_dir_all(&dir).expect("mkdir");
-        std::fs::write(dir.join("wezterm.bench"), report.to_line()).expect("write");
+        std::fs::write(dir.join("wezterm.bench.json"), report.to_json()).expect("write");
     }
     // 예산은 게이트다(SPEC.md §14.2) — 어기면 여기서 떨어진다. 후보끼리 견주지 않는다:
     // 이 유닛이 잰 수요와 이 유닛의 성적만 본다.
