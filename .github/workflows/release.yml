@@ -1,7 +1,7 @@
 # 릴리즈 — main 에서 수동 dispatch 시 다섯 플랫폼 타깃마다 사이드카 dist 아카이브를 빌드해
 # owner-immutable GitHub Release 자산으로 올린다. 각 타깃은 그 타깃의 네이티브 러너에서
 # 빌드하므로 크로스 링커가 필요 없다. 버전/태그는 소유 manifest(Cargo.toml)에서 유도하고
-# release/unit.json 과의 일치를 build-release 가 판정한다.
+# sidecar.json 과의 일치를 build-release 가 판정한다.
 # publish 는 매트릭스 전체를 내려받아 소유 릴리즈 manifest(release.json)와 conformance 리포트
 # 3종을 합성하고, 핀된 공개 soksak-spec 검증기로 판정한 뒤에만 자산으로 올린다 — 서명 레지스트리
 # 인덱스가 릴리즈를 실을 수 있는 것은 이 manifest 뿐이다.
@@ -56,7 +56,10 @@ jobs:
         run: |
           ver="${{ steps.identity.outputs.version }}"
           out="soksak-sidecar-terminal-wezterm-$ver-${{ matrix.target }}.tar.gz"
-          tar -czf "$out" -C dist .
+          mkdir -p package/dist
+          cp sidecar.json package/sidecar.json
+          cp "dist/soksak-sidecar-terminal-wezterm" package/dist/
+          tar -czf "$out" -C package .
           # sha256 도구는 러너마다 다르다 — macOS 는 shasum(perl), linux·windows(git-bash)
           # 는 sha256sum(coreutils). 둘 다 "<hex>  <file>" 형식으로 동일하다.
           if command -v sha256sum >/dev/null 2>&1; then

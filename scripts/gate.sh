@@ -12,10 +12,10 @@ set -euo pipefail
 export PATH="$HOME/.cargo/bin:$PATH"
 
 cd "$(dirname "$0")/.."
-UNIT="soksak-sidecar-terminal-wezterm"
+SIDECAR="soksak-sidecar-terminal-wezterm"
 BENCH_OUT="${1:-}"
 
-echo "== $UNIT: 적합성 + 유닛 + 통합"
+echo "== $SIDECAR: conformance, tests, integration"
 cargo test --release
 
 # 예산의 상대는 **수요**이고, 수요는 실 데몬이 tee 로 배달하는 속도다(SPEC.md §14.1). 그러니
@@ -30,11 +30,11 @@ if [ -z "${SOKSAK_PTYD_BIN:-}" ]; then
   export SOKSAK_PTYD_BIN="$TARGET_DIR/release/soksak-ptyd"
 fi
 
-echo "== $UNIT: 성능 예산(SPEC.md §14.2) — 수요는 실 데몬이 배달하는 속도다"
+echo "== $SIDECAR: performance budget (SPEC.md §14.2)"
 if [ -n "$BENCH_OUT" ]; then
   SOKSAK_BENCH_OUT="$BENCH_OUT" cargo test --release --test bench -- --ignored --nocapture
 else
   cargo test --release --test bench -- --ignored --nocapture
 fi
 
-echo "== $UNIT: GATE PASS"
+echo "== $SIDECAR: GATE PASS"

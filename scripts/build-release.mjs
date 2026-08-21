@@ -32,8 +32,6 @@ const artifacts = readTargetMatrix().map(({ target }) => {
     url: `${REPOSITORY}/releases/download/${TAG}/${asset}`,
     sha256: digest,
     format: "tar.gz",
-    // The archive carries the contents of dist/ at top level (SIDECARS.md §6):
-    // the service binary is the archive root entry, not bin/<id>.
     entrypoint: {
       kind: "sidecar",
       interface: INTERFACE,

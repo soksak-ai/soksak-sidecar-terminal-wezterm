@@ -1,0 +1,10 @@
+{
+  "spec": "soksak-spec-sidecar@0.0.1",
+  "id": "soksak-sidecar-terminal-wezterm",
+  "version": "0.0.1",
+  "interface": {
+    "id": "soksak-spec-sidecar-terminal",
+    "version": "0.0.1"
+  },
+  "process": "dist/soksak-sidecar-terminal-wezterm"
+}
