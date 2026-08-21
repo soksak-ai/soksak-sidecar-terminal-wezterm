@@ -5,18 +5,16 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const workflow = fs.readFileSync(path.join(root, ".github/workflows/release.yml"), "utf8");
-const sources = JSON.parse(fs.readFileSync(path.join(root, "release/source-dependencies.json"), "utf8"));
+const manifest = JSON.parse(fs.readFileSync(path.join(root, "sidecar.json"), "utf8"));
+const ownerPath = `soksak-sidecars/${manifest.id}`;
 const targets = JSON.parse(fs.readFileSync(path.join(root, "release/targets.json"), "utf8"));
 const requireText = (value, label) => { if (!workflow.includes(value)) throw new Error(`release workflow is missing ${label}: ${value}`); };
-requireText(`path: ${sources.ownerPath}`, "owner checkout path");
-requireText(`working-directory: ${sources.ownerPath}`, "owner working directory");
-requireText(`${sources.ownerPath}/\${{ steps.archive.outputs.asset }}`, "artifact upload path");
-requireText(`working-directory: ${sources.ownerPath}/.dependency/soksak-spec`, "validator build directory");
-for (const dependency of sources.dependencies) {
-  if (!/^[0-9a-f]{40}$/.test(dependency.commit)) throw new Error(`dependency commit must be exact: ${dependency.repository}`);
-  requireText(`repository: ${dependency.repository}`, "dependency repository");
-  requireText(`ref: ${dependency.commit}`, "dependency commit");
-  requireText(`path: ${dependency.path}`, "dependency checkout path");
+requireText(`path: ${ownerPath}`, "owner checkout path");
+requireText(`working-directory: ${ownerPath}`, "owner working directory");
+requireText(`${ownerPath}/\${{ steps.archive.outputs.asset }}`, "artifact upload path");
+requireText(`working-directory: ${ownerPath}/.dependency/soksak-spec`, "validator build directory");
+for (const obsolete of ["release/source-dependencies.json", "release/dependencies.json"]) {
+  if (fs.existsSync(path.join(root, obsolete))) throw new Error(`${obsolete} is obsolete`);
 }
 for (const { target, runner } of targets) { requireText(`target: ${target}`, "release target"); requireText(`runner: ${runner}`, "release runner"); }
 requireText("release-template/sidecar/build-release.mjs", "canonical release builder");

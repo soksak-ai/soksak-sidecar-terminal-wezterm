@@ -1,8 +1,0 @@
-{
-  "ownerPath": "soksak-sidecars/soksak-sidecar-terminal-wezterm",
-  "dependencies": [
-    { "repository": "soksak-ai/soksak-kit-sidecar-terminal", "commit": "c2fd091c5cfd5de41297a9111231b8b442cea971", "path": "soksak-kits/soksak-kit-sidecar-terminal" },
-    { "repository": "soksak-ai/soksak-contract-terminal", "commit": "5185e9f43b5b7bd236beb449e3fb252d02b4732e", "path": "soksak-contracts/soksak-contract-terminal" },
-    { "repository": "soksak-ai/soksak-spec", "commit": "1b0d4b11ed8bedfa4175cee32e13e637a13925c7", "path": "soksak-sidecars/soksak-sidecar-terminal-wezterm/.dependency/soksak-spec" }
-  ]
-}
