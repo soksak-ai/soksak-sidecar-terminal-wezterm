@@ -10,11 +10,11 @@ use soksak_contract_terminal::MirrorUnderTest;
 use soksak_sidecar_terminal_wezterm::engine::{ColorSnap, GridCell, ModeSnap};
 use soksak_sidecar_terminal_wezterm::Mirror;
 
-pub struct Unit(Mirror);
+pub struct ProviderMirror(Mirror);
 
-impl MirrorUnderTest for Unit {
+impl MirrorUnderTest for ProviderMirror {
     fn new(cols: u16, rows: u16) -> Self {
-        Unit(Mirror::new(cols, rows))
+        ProviderMirror(Mirror::new(cols, rows))
     }
 
     fn feed(&mut self, bytes: &[u8]) {
