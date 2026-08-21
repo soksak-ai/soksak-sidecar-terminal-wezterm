@@ -36,8 +36,23 @@ jobs:
           - target: x86_64-pc-windows-msvc
             runner: windows-2025
     runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        working-directory: soksak-sidecars/soksak-sidecar-terminal-wezterm
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: soksak-sidecars/soksak-sidecar-terminal-wezterm
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: soksak-ai/soksak-kit-sidecar-terminal
+          ref: c2fd091c5cfd5de41297a9111231b8b442cea971
+          path: soksak-kits/soksak-kit-sidecar-terminal
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: soksak-ai/soksak-contract-terminal
+          ref: 5185e9f43b5b7bd236beb449e3fb252d02b4732e
+          path: soksak-contracts/soksak-contract-terminal
       - uses: dtolnay/rust-toolchain@4be7066ada62dd38de10e7b70166bc74ed198c30
         with:
           toolchain: "1.96.0"
@@ -72,16 +87,21 @@ jobs:
         with:
           name: dist-${{ matrix.target }}
           path: |
-            ${{ steps.archive.outputs.asset }}
-            ${{ steps.archive.outputs.asset }}.sha256
+            soksak-sidecars/soksak-sidecar-terminal-wezterm/${{ steps.archive.outputs.asset }}
+            soksak-sidecars/soksak-sidecar-terminal-wezterm/${{ steps.archive.outputs.asset }}.sha256
           if-no-files-found: error
           compression-level: 0
 
   publish:
     needs: build
     runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: soksak-sidecars/soksak-sidecar-terminal-wezterm
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: soksak-sidecars/soksak-sidecar-terminal-wezterm
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "22.12.0"
@@ -96,16 +116,16 @@ jobs:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           pattern: dist-*
-          path: dist
+          path: soksak-sidecars/soksak-sidecar-terminal-wezterm/dist
           merge-multiple: true
       - run: node scripts/build-release.mjs --commit "${{ github.sha }}" --tag "${{ steps.identity.outputs.tag }}" --artifacts dist --out dist-release
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           repository: soksak-ai/soksak-spec
           ref: d7f54852754195527f125d1fc11362316157d19b
-          path: .dependency/soksak-spec
+          path: soksak-sidecars/soksak-sidecar-terminal-wezterm/.dependency/soksak-spec
       - name: Build the exact public validator without links
-        working-directory: .dependency/soksak-spec
+        working-directory: soksak-sidecars/soksak-sidecar-terminal-wezterm/.dependency/soksak-spec
         run: |
           pnpm --config.node-linker=hoisted --config.symlink=false install --frozen-lockfile
           pnpm build
