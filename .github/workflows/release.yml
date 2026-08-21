@@ -73,6 +73,7 @@ jobs:
           out="soksak-sidecar-terminal-wezterm-$ver-${{ matrix.target }}.tar.gz"
           mkdir -p package/dist
           cp sidecar.json package/sidecar.json
+          cp LICENSE THIRD-PARTY-NOTICES package/
           cp "dist/soksak-sidecar-terminal-wezterm" package/dist/
           tar -czf "$out" -C package .
           # sha256 도구는 러너마다 다르다 — macOS 는 shasum(perl), linux·windows(git-bash)
@@ -118,11 +119,10 @@ jobs:
           pattern: dist-*
           path: soksak-sidecars/soksak-sidecar-terminal-wezterm/dist
           merge-multiple: true
-      - run: node scripts/build-release.mjs --commit "${{ github.sha }}" --tag "${{ steps.identity.outputs.tag }}" --artifacts dist --out dist-release
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           repository: soksak-ai/soksak-spec
-          ref: d7f54852754195527f125d1fc11362316157d19b
+          ref: 65d114f7aa2a722b35480bdff727c73cda620265
           path: soksak-sidecars/soksak-sidecar-terminal-wezterm/.dependency/soksak-spec
       - name: Build the exact public validator without links
         working-directory: soksak-sidecars/soksak-sidecar-terminal-wezterm/.dependency/soksak-spec
@@ -130,7 +130,8 @@ jobs:
           pnpm --config.node-linker=hoisted --config.symlink=false install --frozen-lockfile
           pnpm build
           test -z "$(find . -type l -print -quit)"
-      - run: node scripts/validate-with-spec.mjs --spec-root .dependency/soksak-spec --release-dir dist-release
+      - run: node .dependency/soksak-spec/packages/plugin-spec/release-template/sidecar/build-release.mjs --commit "${{ github.sha }}" --tag "${{ steps.identity.outputs.tag }}" --artifacts dist --out dist-release
+      - run: node .dependency/soksak-spec/packages/plugin-spec/release-template/sidecar/validate-with-spec.mjs --spec-root .dependency/soksak-spec --release-dir dist-release
       - name: Create least-privilege release token
         id: release-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1
