@@ -56,11 +56,17 @@ fn feed_profile() {
             sum += feed_once(&corpus);
             n += 1;
         }
-        println!("feed {:.1} MB/s (mean of {n} runs over {secs}s)", sum / n as f64);
+        println!(
+            "feed {:.1} MB/s (mean of {n} runs over {secs}s)",
+            sum / n as f64
+        );
         return;
     }
 
-    println!("feed {:.1} MB/s (one buffer, median of 7)", median_of_7(&corpus, corpus.len()));
+    println!(
+        "feed {:.1} MB/s (one buffer, median of 7)",
+        median_of_7(&corpus, corpus.len())
+    );
     // 데몬이 실제로 배달하는 모양 — 조각이 작아질수록 조각당 고정비가 드러난다. 8192 는
     // 데몬이 PTY 를 읽는 버퍼 크기이고 tee 는 읽은 만큼 그대로 흘리므로, 실전의 조각이 그것이다.
     for chunk in [256 * 1024, 64 * 1024, 16 * 1024, 8 * 1024, 4 * 1024] {
@@ -68,7 +74,11 @@ fn feed_profile() {
             "feed {:.1} MB/s (chunks of {:>6} B, median of 7){}",
             median_of_7(&corpus, chunk),
             chunk,
-            if chunk == 8 * 1024 { "  <- 데몬의 PTY 읽기 크기" } else { "" }
+            if chunk == 8 * 1024 {
+                "  <- 데몬의 PTY 읽기 크기"
+            } else {
+                ""
+            }
         );
     }
 }

@@ -1,7 +1,7 @@
 //! 엔진 격리 좌석 — wezterm-term 을 만지는 유일한 모듈. 미러(복원 직렬화기)는 여기가
 //! 내놓는 엔진-중립 뷰(스칼라 상태 + [`GridCell`] 행 읽기)만 쓴다. 판정자는 별도 엔진 위에
-//! 채점은 계약이 선언한 골든이 한다 — 이 좌석이 만든 화면과, 그 화면이 만든 페인트가 되살린
-//! 화면이 둘 다 같은 골든이어야 한다(자기-일관 오류도 골든이 바깥이라 숨지 못한다).
+//! 채점은 계약이 선언한 reference state이 한다 — 이 좌석이 만든 화면과, 그 화면이 만든 페인트가 되살린
+//! 화면이 둘 다 같은 reference state이어야 한다(자기-일관 오류도 reference state이 바깥이라 숨지 못한다).
 //!
 //! 엔진-중립 타입(이 파일 위쪽의 [`ColorSnap`]·[`ModeSnap`]·[`GridCell`])은 직렬화기가
 //! 그리드를 읽는 창이다. [`Engine`] 만 wezterm 이다.
@@ -22,6 +22,10 @@
 
 use std::sync::{Arc, Mutex};
 
+use soksak_kit_sidecar_terminal::mirror::TerminalEngine;
+pub use soksak_kit_sidecar_terminal::mirror::{
+    TerminalCell as GridCell, TerminalColor as ColorSnap, TerminalModes as ModeSnap,
+};
 use termwiz::cell::{CellAttributes, Intensity, Underline};
 use termwiz::color::ColorAttribute;
 use termwiz::escape::csi::{
@@ -35,60 +39,6 @@ use wezterm_term::{Terminal, TerminalConfiguration, TerminalSize};
 /// 엔진이 유지하는 스크롤백 행 수. 바이트 충실 복원의 바닥 — 전체 의미 이력은
 /// command_blocks(app.data)가 소유하고, 이 수치는 화면 재현용 창이다.
 pub const MIRROR_SCROLLBACK_LINES: usize = 1000;
-
-// ── 엔진-중립 스냅샷 타입(계약의 비교 통화 — 두 엔진 유닛 공용) ──────────────
-
-/// 색 스냅샷 — 엔진 타입을 밖으로 새지 않게 자체 표현으로 고정한다.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub enum ColorSnap {
-    #[default]
-    Default,
-    Named(u8),
-    Indexed(u8),
-    Rgb(u8, u8, u8),
-}
-
-/// 복원 대상 private mode 집합의 스냅샷(rehydrate 가 재현해야 하는 전부).
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
-pub struct ModeSnap {
-    pub bracketed_paste: bool,
-    pub app_cursor: bool,
-    pub app_keypad: bool,
-    pub mouse_click: bool,
-    pub mouse_drag: bool,
-    pub mouse_motion: bool,
-    pub sgr_mouse: bool,
-    pub utf8_mouse: bool,
-    pub focus_in_out: bool,
-    pub alternate_scroll: bool,
-    pub show_cursor: bool,
-    pub line_wrap: bool,
-    pub insert: bool,
-}
-
-/// 직렬화기가 읽는 엔진-중립 셀 — 직렬화에 필요한 것을 다 담는다(spacer·wrapline·zerowidth
-/// 포함). 이 타입 하나가 직렬화기의 그리드 읽기 단일 창이다 — 엔진 세부는 이 파일 밖으로
-/// 나가지 않는다.
-pub struct GridCell {
-    pub ch: char,
-    pub fg: ColorSnap,
-    pub bg: ColorSnap,
-    pub bold: bool,
-    pub dim: bool,
-    pub italic: bool,
-    pub underline: bool,
-    pub inverse: bool,
-    pub strikeout: bool,
-    pub hidden: bool,
-    /// wide 문자 본체(2칸 점유의 첫 칸).
-    pub wide: bool,
-    /// wide 문자 스페이서(본체 뒤 칸 또는 줄끝 선두 스페이서) — 직렬화기가 건너뛴다.
-    pub spacer: bool,
-    /// WRAPLINE — 마지막 칸에서만 의미: 이 행이 자연 개행(wrap)으로 이어진다.
-    pub wrapline: bool,
-    /// 결합 문자(zero-width) 후속.
-    pub zerowidth: Vec<char>,
-}
 
 // ── 응답 tap — 터미널이 PTY 에 answerback 하려는 바이트를 writer 로 포획 ────────
 // 엔진에게 이 writer 를 **동기**로 부르라고 말해 둔다(`MirrorConfig::threaded_writer` = false).
@@ -225,12 +175,25 @@ impl Engine {
     pub fn new(cols: u16, rows: u16) -> Self {
         let cols = cols.max(1);
         let rows = rows.max(1);
-        let state = Arc::new(ReplyState { replies: Mutex::new(Vec::new()) });
+        let state = Arc::new(ReplyState {
+            replies: Mutex::new(Vec::new()),
+        });
         let writer = Box::new(ReplyTap(state.clone()));
         let size = term_size(cols, rows);
-        let term =
-            Terminal::new(size, Arc::new(MirrorConfig), "soksak-sidecar-terminal", "1", writer);
-        Engine { term, state, modes: ModeTracker::new(), cols, rows }
+        let term = Terminal::new(
+            size,
+            Arc::new(MirrorConfig),
+            "soksak-sidecar-terminal",
+            "1",
+            writer,
+        );
+        Engine {
+            term,
+            state,
+            modes: ModeTracker::new(),
+            cols,
+            rows,
+        }
     }
 
     pub fn feed(&mut self, bytes: &[u8]) {
@@ -239,7 +202,8 @@ impl Engine {
         // 통째로 모아 두는 중간 버퍼도 없다. 파서는 엔진 안에서 상태를 유지해 청크 경계의 부분
         // 시퀀스를 재조립한다(mirror.feed 가 ESC 경계로 쪼개도 안전).
         let modes = &mut self.modes;
-        self.term.advance_bytes_observed(bytes, |a| modes.observe(a));
+        self.term
+            .advance_bytes_observed(bytes, |a| modes.observe(a));
     }
 
     pub fn resize(&mut self, cols: u16, rows: u16) {
@@ -259,7 +223,11 @@ impl Engine {
     /// 이 엔진이 PTY 에 되쓰려 한 응답들(DA1/DSR/OSC 질의 답). 재생 가드의 프로브 —
     /// 복원 시퀀스를 먹인 엔진에서 이게 비어 있지 않으면 이중응답이다.
     pub fn captured_replies(&self) -> Vec<String> {
-        self.state.replies.lock().unwrap_or_else(|e| e.into_inner()).clone()
+        self.state
+            .replies
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .clone()
     }
 
     pub fn alt_active(&self) -> bool {
@@ -276,7 +244,9 @@ impl Engine {
     /// 수(scrollback+visible)라, 보이는 행 수를 빼야 진짜 스크롤백이다.
     pub fn history_size(&self) -> usize {
         let screen = self.term.screen();
-        screen.scrollback_rows().saturating_sub(screen.physical_rows)
+        screen
+            .scrollback_rows()
+            .saturating_sub(screen.physical_rows)
     }
 
     pub fn modes(&self) -> ModeSnap {
@@ -334,13 +304,52 @@ fn materialize_line_into(line: &Line, cols: usize, grid: &mut Vec<GridCell>) {
         }
         grid[col] = cell_of(&cr);
         if cr.width() == 2 && col + 1 < cols {
-            grid[col + 1] = GridCell { spacer: true, ..blank_cell() };
+            grid[col + 1] = GridCell {
+                spacer: true,
+                ..blank_cell()
+            };
         }
     }
     if line.last_cell_was_wrapped() {
         if let Some(last) = grid.last_mut() {
             last.wrapline = true;
         }
+    }
+}
+
+impl TerminalEngine for Engine {
+    fn new(cols: u16, rows: u16) -> Self {
+        Engine::new(cols, rows)
+    }
+    fn feed(&mut self, bytes: &[u8]) {
+        Engine::feed(self, bytes);
+    }
+    fn resize(&mut self, cols: u16, rows: u16) {
+        Engine::resize(self, cols, rows);
+    }
+    fn cols(&self) -> u16 {
+        Engine::cols(self)
+    }
+    fn rows(&self) -> u16 {
+        Engine::rows(self)
+    }
+    fn cursor(&self) -> (usize, usize) {
+        Engine::cursor(self)
+    }
+    fn alt_active(&self) -> bool {
+        Engine::alt_active(self)
+    }
+    fn history_size(&self) -> usize {
+        Engine::history_size(self)
+    }
+    fn modes(&self) -> ModeSnap {
+        Engine::modes(self)
+    }
+    fn line_cells(&self, line: i32) -> Vec<GridCell> {
+        Engine::line_cells(self, line)
+    }
+    fn suppressed_replies(&self) -> u64 {
+        self.captured_replies().len() as u64
     }
 }
 

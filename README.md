@@ -11,7 +11,7 @@ as `[redacted]` carries Chromium).
 The normative wire (server face, consumer/daemon peering, checkpoint policy, failure
 semantics, acceptance) is owned by **one** repo, and it is not this one:
 `soksak-contract-terminal` (`~/.soksak-dev/contracts/soksak-contract-terminal`). It owns
-`SPEC.md`, the corpus, the declared goldens, and the assertions this unit is graded by.
+`SPEC.md`, the corpus, the declared reference states, and the assertions this unit is graded by.
 This unit implements that contract; it does not restate it.
 
 ## Engine seat vs shared machinery
@@ -33,7 +33,7 @@ behalf. The declared reference state is the sole correctness criterion for this 
 ## The gate
 
 **This unit passes when `scripts/gate.sh` passes, and by no other means.** One command, all of
-it blocking: the seven fixtures against the contract's declared goldens, the unit tests, the
+it blocking: the seven fixtures against the contract's declared reference states, the unit tests, the
 real-daemon integration, and the performance budgets (SPEC.md §14.2). The benchmark is ignored
 in the ordinary test run — it would slow the development loop — so the gate is what makes the
 budget binding rather than decorative. The contract repo's own `scripts/gate.sh` runs this one

@@ -1,4 +1,4 @@
-// 계약 합격시험 — 픽스처도 골든도 여기 없다. 정본은 soksak-contract-terminal 이고, 이 파일은
+// 계약 합격시험 — 픽스처도 reference state도 여기 없다. 정본은 soksak-contract-terminal 이고, 이 파일은
 // 이 유닛의 미러를 그 시험대에 세우는 좌석이다.
 //
 // 좌석이 지는 일은 하나뿐이다: 이 엔진의 화면 표현을 계약의 **정규형**(ScreenState, SPEC.md §11)
@@ -6,7 +6,7 @@
 // 여기서는 그 판정을 따를 뿐이다.
 
 use soksak_contract_terminal as contract;
-use soksak_contract_terminal::{Fixture, MirrorUnderTest};
+use soksak_contract_terminal::MirrorUnderTest;
 use soksak_sidecar_terminal_wezterm::engine::{ColorSnap, GridCell, ModeSnap};
 use soksak_sidecar_terminal_wezterm::Mirror;
 
@@ -47,7 +47,9 @@ impl MirrorUnderTest for Unit {
             cursor: (col as u16, row as u16),
             modes: modes_of(self.0.modes()),
             history: (-hist..0).map(|l| row_of(self.0.line_cells(l))).collect(),
-            visible: (0..self.0.rows() as i32).map(|l| row_of(self.0.line_cells(l))).collect(),
+            visible: (0..self.0.rows() as i32)
+                .map(|l| row_of(self.0.line_cells(l)))
+                .collect(),
         }
     }
 }

@@ -5,6 +5,6 @@
   "repository": "https://github.com/soksak-ai/soksak-sidecar-terminal-wezterm",
   "interface": {
     "id": "soksak-spec-sidecar-terminal",
-    "version": "0.0.3"
+    "version": "0.0.1"
   }
 }
