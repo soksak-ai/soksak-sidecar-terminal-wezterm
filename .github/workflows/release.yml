@@ -46,7 +46,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: soksak-ai/soksak-kit-sidecar-terminal
-          ref: 876e74628167f8e0ea6f2939a9ec6d13a300418f
+          ref: 2b7d7ee5855a2dbef4507da44c347ad4fd74e552
           path: soksak-kits/soksak-kit-sidecar-terminal
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
