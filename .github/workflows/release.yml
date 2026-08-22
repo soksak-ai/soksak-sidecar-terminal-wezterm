@@ -122,7 +122,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           repository: soksak-ai/soksak-spec
-          ref: 1f53965c592a44766df0420c3e6bab19e2362377
+          ref: 23a941a99f037f48120243e5724a73284e6cfb30
           path: soksak-sidecars/soksak-sidecar-terminal-wezterm/.dependency/soksak-spec
       - name: Build the exact public validator without links
         working-directory: soksak-sidecars/soksak-sidecar-terminal-wezterm/.dependency/soksak-spec
