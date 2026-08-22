@@ -14,7 +14,7 @@ const stage = fs.readFileSync(path.join(root, "stage.sh"), "utf8");
 if (/\bpath\s*=\s*"\.\.\//.test(cargo)) throw new Error("Cargo dependencies must not require sibling checkouts");
 requireText("ref: 5407f266e65ddfc26e43c0ca6690e57ba0b6ff6a", "terminal sidecar kit commit");
 requireText("ref: cab0691a1a01fca7436ac29f6cc2850245788ea6", "terminal contract commit");
-requireText("ref: 50993e5287a29e0d0a2f0cac096fa5ef12d06ea4", "platform spec commit");
+requireText("ref: ef67d91f635524a667b8c78052358173d55bf019", "platform spec commit");
 requireText(`path: ${ownerPath}`, "owner checkout path");
 requireText(`working-directory: ${ownerPath}`, "owner working directory");
 requireText(`${ownerPath}/\${{ steps.archive.outputs.asset }}`, "artifact upload path");
@@ -28,7 +28,11 @@ requireText("release-template/sidecar/validate-with-spec.mjs", "canonical releas
 requireText("release-template/publish-canonical-release.mjs", "canonical immutable publisher");
 requireText("cp dist/sidecar.json package/sidecar.json", "target-specific manifest packaging");
 requireText("cp dist/soksak-sidecar-terminal-wezterm* package/dist/", "target-specific executable packaging");
-for (const required of ['staged="$name$ext"', '"process": "dist/$staged"']) if (!stage.includes(required)) throw new Error("stage.sh is missing " + required);
+if (!stage.includes('staged="$name$ext"')) throw new Error("stage.sh must select the target executable name");
+if (/"version":\s*"[0-9]+\.[0-9]+\.[0-9]+"/.test(stage)) throw new Error("stage.sh must not duplicate the sidecar version");
+if (!stage.includes('sed "s#\\\"process\\\": \\\"dist/$name\\\"#\\\"process\\\": \\\"dist/$staged\\\"#" sidecar.json')) {
+  throw new Error("stage.sh must derive the staged manifest from sidecar.json");
+}
 requireText("GH_TOKEN: ${{ steps.release-token.outputs.token }}", "GitHub CLI release token");
 for (const duplicate of ["build-release.mjs", "release-contract.mjs", "validate-with-spec.mjs"]) if (fs.existsSync(path.join(root, "scripts", duplicate))) throw new Error(`local spec copy is forbidden: scripts/${duplicate}`);
 if (fs.existsSync(path.join(root, "validation/spec-validator.json"))) throw new Error("local spec pin copy is forbidden");

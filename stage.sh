@@ -41,15 +41,5 @@ cp "$src" "$tmp"
 chmod +x "$tmp"
 staged="$name$ext"
 mv -f "$tmp" "$dist/$staged"
-cat > "$dist/sidecar.json" <<EOF
-{
-  "id": "$name",
-  "version": "0.0.5",
-  "interface": {
-    "id": "soksak-spec-sidecar-terminal",
-    "version": "0.0.1"
-  },
-  "process": "dist/$staged"
-}
-EOF
+sed "s#\"process\": \"dist/$name\"#\"process\": \"dist/$staged\"#" sidecar.json > "$dist/sidecar.json"
 echo "staged: $dist/$staged"
