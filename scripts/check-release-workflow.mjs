@@ -12,7 +12,7 @@ const requireText = (value, label) => { if (!workflow.includes(value)) throw new
 const cargo = fs.readFileSync(path.join(root, "Cargo.toml"), "utf8");
 const stage = fs.readFileSync(path.join(root, "stage.sh"), "utf8");
 if (/\bpath\s*=\s*"\.\.\//.test(cargo)) throw new Error("Cargo dependencies must not require sibling checkouts");
-requireText("ref: 4af58a772a141b9e4d4258ae5f21a140aa162d82", "terminal sidecar kit commit");
+requireText("ref: 5407f266e65ddfc26e43c0ca6690e57ba0b6ff6a", "terminal sidecar kit commit");
 requireText("ref: cab0691a1a01fca7436ac29f6cc2850245788ea6", "terminal contract commit");
 requireText("ref: 50993e5287a29e0d0a2f0cac096fa5ef12d06ea4", "platform spec commit");
 requireText(`path: ${ownerPath}`, "owner checkout path");
