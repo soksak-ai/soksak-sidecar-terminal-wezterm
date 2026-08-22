@@ -122,7 +122,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           repository: soksak-ai/soksak-spec
-          ref: 8afc21b75bfbef7090410a69da9fd48796dfec62
+          ref: 1673f33d2102f6ad168f28871d312301fd307371
           path: soksak-sidecars/soksak-sidecar-terminal-wezterm/.dependency/soksak-spec
       - name: Build the exact public validator without links
         working-directory: soksak-sidecars/soksak-sidecar-terminal-wezterm/.dependency/soksak-spec
@@ -140,16 +140,14 @@ jobs:
           private-key: ${{ secrets.SOKSAK_RELEASE_PRIVATE_KEY }}
           permission-administration: read
           permission-contents: write
+      - name: Collect the canonical public asset set
+        run: |
+          mkdir publish-assets
+          find dist -maxdepth 1 -type f -name '*.tar.gz' -exec cp {} publish-assets/ \;
+          cp dist-release/*.json publish-assets/
       - name: Publish through owner-enforced immutable releases
         env:
-          GH_TOKEN: ${{ steps.release-token.outputs.token }}
+          SOKSAK_RELEASE_TOKEN: ${{ steps.release-token.outputs.token }}
         run: |
-          enforced="$(gh api "repos/${{ github.repository }}/immutable-releases" --jq '.enabled and .enforced_by_owner')"
-          test "$enforced" = "true" || { echo "owner-enforced immutable releases must be enabled before tagging" >&2; exit 1; }
-          tag="${{ steps.identity.outputs.tag }}"
-          assets="$(find dist dist-release -type f \( -name '*.tar.gz' -o -name '*.sha256' -o -name '*.json' \) | sort)"
-          test "$(printf '%s\n' "$assets" | grep -c '\.tar\.gz$')" -eq 5 || { echo "expected 5 platform archives, got:" >&2; echo "$assets" >&2; exit 1; }
-          test "$(printf '%s\n' "$assets" | grep -c '\.tar\.gz\.sha256$')" -eq 5 || { echo "expected 5 archive checksums, got:" >&2; echo "$assets" >&2; exit 1; }
-          test "$(printf '%s\n' "$assets" | grep -c '/release\.json$')" -eq 1 || { echo "expected the owner release manifest, got:" >&2; echo "$assets" >&2; exit 1; }
-          test "$(printf '%s\n' "$assets" | grep -c '/conformance-[a-z]*\.json$')" -eq 3 || { echo "expected 3 conformance reports, got:" >&2; echo "$assets" >&2; exit 1; }
-          gh release create "$tag" --repo "${{ github.repository }}" --target "${{ github.sha }}" --title "$tag" --generate-notes $assets
+          test "$(gh api "repos/${{ github.repository }}/immutable-releases" --jq '.enabled and .enforced_by_owner')" = "true" || { echo "owner-enforced immutable releases must be enabled before tagging" >&2; exit 1; }
+          node .dependency/soksak-spec/packages/plugin-spec/release-template/publish-canonical-release.mjs --repository "${{ github.repository }}" --commit "${{ github.sha }}" --artifacts "$GITHUB_WORKSPACE/soksak-sidecars/soksak-sidecar-terminal-wezterm/publish-assets" --manifest "$GITHUB_WORKSPACE/soksak-sidecars/soksak-sidecar-terminal-wezterm/publish-assets/release.json"
