@@ -40,15 +40,15 @@ jobs:
       run:
         working-directory: soksak-sidecars/soksak-sidecar-terminal-wezterm
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           path: soksak-sidecars/soksak-sidecar-terminal-wezterm
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: soksak-ai/soksak-kit-sidecar-terminal
           ref: 4af58a772a141b9e4d4258ae5f21a140aa162d82
           path: soksak-kits/soksak-kit-sidecar-terminal
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: soksak-ai/soksak-contract-terminal
           ref: cab0691a1a01fca7436ac29f6cc2850245788ea6
@@ -72,9 +72,9 @@ jobs:
           ver="${{ steps.identity.outputs.version }}"
           out="soksak-sidecar-terminal-wezterm-$ver-${{ matrix.target }}.tar.gz"
           mkdir -p package/dist
-          cp sidecar.json package/sidecar.json
+          cp dist/sidecar.json package/sidecar.json
           cp LICENSE THIRD-PARTY-NOTICES package/
-          cp "dist/soksak-sidecar-terminal-wezterm" package/dist/
+          cp dist/soksak-sidecar-terminal-wezterm* package/dist/
           tar -czf "$out" -C package .
           # sha256 도구는 러너마다 다르다 — macOS 는 shasum(perl), linux·windows(git-bash)
           # 는 sha256sum(coreutils). 둘 다 "<hex>  <file>" 형식으로 동일하다.
@@ -84,7 +84,7 @@ jobs:
             shasum -a 256 "$out" | tee "$out.sha256"
           fi
           echo "asset=$out" >> "$GITHUB_OUTPUT"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: dist-${{ matrix.target }}
           path: |
@@ -100,13 +100,13 @@ jobs:
       run:
         working-directory: soksak-sidecars/soksak-sidecar-terminal-wezterm
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           path: soksak-sidecars/soksak-sidecar-terminal-wezterm
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
-          node-version: "22.12.0"
-      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
+          node-version: "24.19.0"
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
         with:
           version: "10.30.3"
       - id: identity
@@ -114,12 +114,12 @@ jobs:
           ver="$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)"
           case "$ver" in ''|*[!0-9.]*) echo "invalid version: $ver" >&2; exit 1;; esac
           echo "tag=v$ver" >> "$GITHUB_OUTPUT"
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           pattern: dist-*
           path: soksak-sidecars/soksak-sidecar-terminal-wezterm/dist
           merge-multiple: true
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: soksak-ai/soksak-spec
           ref: 50993e5287a29e0d0a2f0cac096fa5ef12d06ea4
