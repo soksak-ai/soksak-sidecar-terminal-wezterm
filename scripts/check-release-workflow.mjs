@@ -13,7 +13,7 @@ const cargo = fs.readFileSync(path.join(root, "Cargo.toml"), "utf8");
 if (/\bpath\s*=\s*"\.\.\//.test(cargo)) throw new Error("Cargo dependencies must not require sibling checkouts");
 requireText("ref: 4af58a772a141b9e4d4258ae5f21a140aa162d82", "terminal sidecar kit commit");
 requireText("ref: cab0691a1a01fca7436ac29f6cc2850245788ea6", "terminal contract commit");
-requireText("ref: 5f1a3e8810245e5e43e65a0f27a994bb854fe36d", "platform spec commit");
+requireText("ref: 50993e5287a29e0d0a2f0cac096fa5ef12d06ea4", "platform spec commit");
 requireText(`path: ${ownerPath}`, "owner checkout path");
 requireText(`working-directory: ${ownerPath}`, "owner working directory");
 requireText(`${ownerPath}/\${{ steps.archive.outputs.asset }}`, "artifact upload path");
