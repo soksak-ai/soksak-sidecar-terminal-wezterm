@@ -43,5 +43,7 @@ impl Mirror {
     pub fn line_cells(&self, line: i32) -> Vec<TerminalCell> {
         self.0.line_cells(line)
     }
-    pub fn frame(&self) -> soksak_kit_sidecar_terminal::mirror::TerminalFrame { self.0.frame() }
+    pub fn frame(&self) -> soksak_kit_sidecar_terminal::mirror::TerminalFrame {
+        self.0.frame()
+    }
 }

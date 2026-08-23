@@ -12,7 +12,9 @@ mod common;
 #[test]
 #[ignore]
 fn bench() {
-    let report = soksak_contract_terminal::bench::run::<common::SidecarMirror>("soksak-sidecar-terminal-wezterm");
+    let report = soksak_contract_terminal::bench::run::<common::SidecarMirror>(
+        "soksak-sidecar-terminal-wezterm",
+    );
     println!("{}", report.to_json());
     // 기록이 판정보다 먼저다. 떨어진 유닛의 숫자야말로 표에 가장 있어야 할 숫자인데, 판정을
     // 먼저 하면 그 유닛은 아무 기록도 남기지 못하고 사라진다.

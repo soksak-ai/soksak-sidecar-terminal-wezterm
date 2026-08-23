@@ -29,7 +29,7 @@ pub use soksak_kit_sidecar_terminal::mirror::{
 use termwiz::cell::{CellAttributes, Intensity, Underline};
 use termwiz::color::ColorAttribute;
 use termwiz::escape::csi::{
-    DecPrivateMode, DecPrivateModeCode, Mode, TerminalMode, TerminalModeCode, CSI,
+    CSI, DecPrivateMode, DecPrivateModeCode, Mode, TerminalMode, TerminalModeCode,
 };
 use termwiz::escape::{Action, Esc, EscCode};
 use termwiz::surface::line::{CellRef, Line};
@@ -250,7 +250,7 @@ impl Engine {
     }
 
     pub fn modes(&self) -> ModeSnap {
-        self.modes.snap.clone()
+        self.modes.snap
     }
 
     /// 한 행(line index; 0..rows = 보이는 화면, 음수 = 스크롤백)을 엔진-중립 셀 벡터로
@@ -310,10 +310,10 @@ fn materialize_line_into(line: &Line, cols: usize, grid: &mut Vec<GridCell>) {
             };
         }
     }
-    if line.last_cell_was_wrapped() {
-        if let Some(last) = grid.last_mut() {
-            last.wrapline = true;
-        }
+    if line.last_cell_was_wrapped()
+        && let Some(last) = grid.last_mut()
+    {
+        last.wrapline = true;
     }
 }
 

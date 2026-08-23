@@ -27,7 +27,9 @@ impl soksak_kit_sidecar_terminal::TerminalStateMirror for Mirror {
     fn cold_paint(&self) -> Vec<u8> {
         Mirror::cold_paint(self)
     }
-    fn frame(&self) -> soksak_kit_sidecar_terminal::mirror::TerminalFrame { Mirror::frame(self) }
+    fn frame(&self) -> soksak_kit_sidecar_terminal::mirror::TerminalFrame {
+        Mirror::frame(self)
+    }
     fn alt_active(&self) -> bool {
         Mirror::alt_active(self)
     }

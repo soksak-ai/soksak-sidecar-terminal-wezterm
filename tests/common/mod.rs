@@ -7,8 +7,8 @@
 
 use soksak_contract_terminal as contract;
 use soksak_contract_terminal::MirrorUnderTest;
-use soksak_sidecar_terminal_wezterm::engine::{ColorSnap, GridCell, ModeSnap};
 use soksak_sidecar_terminal_wezterm::Mirror;
+use soksak_sidecar_terminal_wezterm::engine::{ColorSnap, GridCell, ModeSnap};
 
 pub struct SidecarMirror(Mirror);
 

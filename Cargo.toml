@@ -7,7 +7,7 @@
 [package]
 name = "soksak-sidecar-terminal-wezterm"
 version = "0.0.9"
-edition = "2021"
+edition = "2024"
 publish = false
 description = "Terminal-domain restore sidecar on the wezterm-term VT engine: mirrors PTY session output into screen state (scrollback, alt-screen, private modes), serializes it into replayable paint for warm/cold restore, and checkpoints sealed plaintext through the core PTY daemon."
 
