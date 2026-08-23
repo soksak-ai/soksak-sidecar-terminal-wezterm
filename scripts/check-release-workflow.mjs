@@ -11,6 +11,7 @@ const targets = JSON.parse(fs.readFileSync(path.join(root, "release/targets.json
 const requireText = (value, label) => { if (!workflow.includes(value)) throw new Error(`release workflow is missing ${label}: ${value}`); };
 const cargo = fs.readFileSync(path.join(root, "Cargo.toml"), "utf8");
 const stage = fs.readFileSync(path.join(root, "stage.sh"), "utf8");
+if (!/^edition = "2024"$/m.test(cargo)) throw new Error("Rust packages must use edition 2024");
 if (/\bpath\s*=\s*"\.\.\//.test(cargo)) throw new Error("Cargo dependencies must not require sibling checkouts");
 requireText("ref: 2b7d7ee5855a2dbef4507da44c347ad4fd74e552", "terminal sidecar kit commit");
 requireText("ref: cab0691a1a01fca7436ac29f6cc2850245788ea6", "terminal contract commit");
