@@ -15,9 +15,9 @@ if (!/^edition = "2024"$/m.test(cargo)) throw new Error("Rust packages must use 
 if (/\bpath\s*=\s*"\.\.\//.test(cargo)) throw new Error("Cargo dependencies must not require sibling checkouts");
 if (!cargo.includes('rev = "2b7d7ee5855a2dbef4507da44c347ad4fd74e552"')) throw new Error("Cargo must pin the terminal sidecar kit commit");
 if (!cargo.includes('rev = "cab0691a1a01fca7436ac29f6cc2850245788ea6"')) throw new Error("Cargo must pin the terminal contract commit");
-requireText("https://github.com/soksak-ai/soksak-spec/releases/download/v0.0.19/soksak-ai-plugin-spec-0.0.19.tgz", "immutable spec package");
-requireText("928c0e6cc12d5500bedd386c1807003bf7c3dd34eed836b4a978d8b16d9e5b7b", "spec package digest");
-requireText('node-version: "26.7.0"', "exact Node version");
+requireText("https://github.com/soksak-ai/soksak-spec/releases/download/v0.0.25/soksak-ai-plugin-spec-0.0.25.tgz", "immutable spec package");
+requireText("2aba0fb38b99e4f646d403e4ea5ac00ec1bb5b4ba1db9283509aa31c8c6c8d57", "spec package digest");
+requireText("node-version-file: soksak-sidecars/soksak-sidecar-terminal-wezterm/.dependency/spec-package/package.json", "Node owner file");
 requireText("--spec-package .dependency/spec-package", "package validator input");
 if (/path:\s+soksak-(?:kits|contracts)\//.test(workflow)) throw new Error("Cargo dependencies must not be staged as sibling repositories");
 if (workflow.includes("repository: soksak-ai/soksak-spec")) throw new Error("release workflow must not checkout the spec source");
