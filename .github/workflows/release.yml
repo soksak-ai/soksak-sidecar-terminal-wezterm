@@ -68,7 +68,7 @@ jobs:
           cp dist/sidecar.json package/sidecar.json
           cp LICENSE THIRD-PARTY-NOTICES package/
           cp dist/soksak-sidecar-terminal-wezterm* package/dist/
-          tar -czf "$out" -C package .
+          tar -czf "$out" -C package LICENSE THIRD-PARTY-NOTICES sidecar.json dist
           # sha256 도구는 러너마다 다르다 — macOS 는 shasum(perl), linux·windows(git-bash)
           # 는 sha256sum(coreutils). 둘 다 "<hex>  <file>" 형식으로 동일하다.
           if command -v sha256sum >/dev/null 2>&1; then
