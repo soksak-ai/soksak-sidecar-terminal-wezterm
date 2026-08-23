@@ -62,6 +62,5 @@ windows-sys = { version = "0.59", features = ["Win32_System_Console", "Win32_Fou
 # implementation does. Dev-only: nothing from it ships.
 soksak-contract-terminal = { git = "https://github.com/soksak-ai/soksak-contract-terminal", rev = "cab0691a1a01fca7436ac29f6cc2850245788ea6" }
 
-# Independent workspace — separate from the core (src-tauri) workspace (a member
-# must live under its workspace root, so a sibling directory cannot join core's).
+# This repository is its own Cargo workspace.
 [workspace]

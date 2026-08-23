@@ -43,16 +43,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           path: soksak-sidecars/soksak-sidecar-terminal-wezterm
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          repository: soksak-ai/soksak-kit-sidecar-terminal
-          ref: 2b7d7ee5855a2dbef4507da44c347ad4fd74e552
-          path: soksak-kits/soksak-kit-sidecar-terminal
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          repository: soksak-ai/soksak-contract-terminal
-          ref: cab0691a1a01fca7436ac29f6cc2850245788ea6
-          path: soksak-contracts/soksak-contract-terminal
       - id: rust-toolchain
         shell: bash
         run: echo "channel=$(sed -n 's/^channel = \"\(.*\)\"/\1/p' rust-toolchain.toml)" >> "$GITHUB_OUTPUT"
@@ -106,12 +96,17 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           path: soksak-sidecars/soksak-sidecar-terminal-wezterm
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          node-version: "24.19.0"
+          repository: soksak-ai/soksak-spec
+          ref: 4c83e41a0aa168bc4c2e11100aba242277c731b6
+          path: soksak-sidecars/soksak-sidecar-terminal-wezterm/.dependency/soksak-spec
       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
         with:
-          version: "10.30.3"
+          package_json_file: soksak-sidecars/soksak-sidecar-terminal-wezterm/.dependency/soksak-spec/package.json
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: soksak-sidecars/soksak-sidecar-terminal-wezterm/.dependency/soksak-spec/package.json
       - id: identity
         run: |
           ver="$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)"
@@ -122,11 +117,6 @@ jobs:
           pattern: dist-*
           path: soksak-sidecars/soksak-sidecar-terminal-wezterm/dist
           merge-multiple: true
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          repository: soksak-ai/soksak-spec
-          ref: ef67d91f635524a667b8c78052358173d55bf019
-          path: soksak-sidecars/soksak-sidecar-terminal-wezterm/.dependency/soksak-spec
       - name: Build the exact public validator without links
         working-directory: soksak-sidecars/soksak-sidecar-terminal-wezterm/.dependency/soksak-spec
         run: |
