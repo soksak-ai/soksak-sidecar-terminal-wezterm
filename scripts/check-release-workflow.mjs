@@ -12,6 +12,7 @@ const stage = read("scripts/stage-built.sh");
 const ownerPath = `soksak-sidecars/${manifest.id}`;
 const requireText = (value, label) => { if (!workflow.includes(value)) throw new Error(`release workflow is missing ${label}: ${value}`); };
 for (const target of ["preflight", "prepare", "build", "stage", "verify"]) if (!new RegExp(`^${target}:`, "m").test(makefile)) throw new Error(`Makefile target is missing: ${target}`);
+if (!/^benchmark:/m.test(makefile) || /--test bench|performance budget/.test(read("scripts/gate.sh"))) throw new Error("benchmark ownership is not separated from verification");
 for (const value of ["spec_url:", "spec_sha256:", "${{ inputs.spec_url }}", "${{ inputs.spec_sha256 }}"]) requireText(value, "release-train input");
 requireText('make verify TARGET="${{ matrix.target }}"', "owner Make verification");
 requireText('make stage TARGET="${{ matrix.target }}" OUT=dist', "owner Make staging");
