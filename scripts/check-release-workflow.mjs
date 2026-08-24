@@ -2,51 +2,25 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const workflow = fs.readFileSync(path.join(root, ".github/workflows/release.yml"), "utf8");
-const manifest = JSON.parse(fs.readFileSync(path.join(root, "sidecar.json"), "utf8"));
+const read = (name) => fs.readFileSync(path.join(root, name), "utf8");
+const workflow = read(".github/workflows/release.yml");
+const manifest = JSON.parse(read("sidecar.json"));
+const targets = JSON.parse(read("release/targets.json"));
+const makefile = read("Makefile");
+const stage = read("scripts/stage-built.sh");
 const ownerPath = `soksak-sidecars/${manifest.id}`;
-const targets = JSON.parse(fs.readFileSync(path.join(root, "release/targets.json"), "utf8"));
 const requireText = (value, label) => { if (!workflow.includes(value)) throw new Error(`release workflow is missing ${label}: ${value}`); };
-const cargo = fs.readFileSync(path.join(root, "Cargo.toml"), "utf8");
-const makefile = fs.readFileSync(path.join(root, "Makefile"), "utf8");
-const stage = fs.readFileSync(path.join(root, "scripts/stage-built.sh"), "utf8");
-for (const target of ["preflight", "prepare", "build", "stage", "verify"]) {
-  if (!new RegExp(`^${target}:`, "m").test(makefile)) throw new Error(`Makefile target is missing: ${target}`);
-}
+for (const target of ["preflight", "prepare", "build", "stage", "verify"]) if (!new RegExp(`^${target}:`, "m").test(makefile)) throw new Error(`Makefile target is missing: ${target}`);
+for (const value of ["spec_url:", "spec_sha256:", "${{ inputs.spec_url }}", "${{ inputs.spec_sha256 }}"]) requireText(value, "release-train input");
 requireText('make verify TARGET="${{ matrix.target }}"', "owner Make verification");
 requireText('make stage TARGET="${{ matrix.target }}" OUT=dist', "owner Make staging");
-if (!/^edition = "2024"$/m.test(cargo)) throw new Error("Rust packages must use edition 2024");
-if (/\bpath\s*=\s*"\.\.\//.test(cargo)) throw new Error("Cargo dependencies must not require sibling checkouts");
-if (!cargo.includes('rev = "f2f48219bde7a981bf4dd18ee193599639c65fe5"')) throw new Error("Cargo must pin the terminal sidecar kit commit");
-if (!cargo.includes('rev = "cab0691a1a01fca7436ac29f6cc2850245788ea6"')) throw new Error("Cargo must pin the terminal contract commit");
-requireText("https://github.com/soksak-ai/soksak-spec/releases/download/v0.0.27/soksak-ai-plugin-spec-0.0.27.tgz", "immutable spec package");
-requireText("a3991634079056d0066de9ffc1af1bac6d65ecf1eb1c72e3619f8fb136d4c513", "spec package digest");
-requireText("node-version-file: soksak-sidecars/soksak-sidecar-terminal-wezterm/.dependency/spec-package/package.json", "Node owner file");
-requireText("--spec-package .dependency/spec-package", "package validator input");
-if (/path:\s+soksak-(?:kits|contracts)\//.test(workflow)) throw new Error("Cargo dependencies must not be staged as sibling repositories");
-if (workflow.includes("repository: soksak-ai/soksak-spec")) throw new Error("release workflow must not checkout the spec source");
-if (workflow.includes("pnpm/action-setup")) throw new Error("release workflow must not rebuild the spec package");
+requireText("release-template/sidecar/pack-target.mjs", "canonical target packer");
 requireText(`path: ${ownerPath}`, "owner checkout path");
 requireText(`working-directory: ${ownerPath}`, "owner working directory");
-requireText(`${ownerPath}/\${{ steps.archive.outputs.asset }}`, "artifact upload path");
-requireText(".dependency/spec-package/release-template/", "immutable package tools");
-for (const obsolete of ["release/source-dependencies.json", "release/dependencies.json"]) {
-  if (fs.existsSync(path.join(root, obsolete))) throw new Error(`${obsolete} is obsolete`);
-}
+requireText("choco install make --version=4.4.1", "Windows Make environment");
+if (!stage.includes('staged=$name$ext')) throw new Error("stage-built does not select the target executable name");
 for (const { target, runner } of targets) { requireText(`target: ${target}`, "release target"); requireText(`runner: ${runner}`, "release runner"); }
-requireText("release-template/sidecar/build-release.mjs", "canonical release builder");
-requireText("release-template/sidecar/validate-with-spec.mjs", "canonical release validator");
-requireText("release-template/publish-canonical-release.mjs", "canonical immutable publisher");
-requireText("cp dist/sidecar.json package/sidecar.json", "target-specific manifest packaging");
-requireText("cp dist/soksak-sidecar-terminal-wezterm* package/dist/", "target-specific executable packaging");
-if (!stage.includes('staged="$name$ext"')) throw new Error("stage.sh must select the target executable name");
-if (/"version":\s*"[0-9]+\.[0-9]+\.[0-9]+"/.test(stage)) throw new Error("stage.sh must not duplicate the sidecar version");
-if (!stage.includes('sed "s#\\\"process\\\": \\\"dist/$name\\\"#\\\"process\\\": \\\"dist/$staged\\\"#" sidecar.json')) {
-  throw new Error("stage.sh must derive the staged manifest from sidecar.json");
-}
-requireText("GH_TOKEN: ${{ steps.release-token.outputs.token }}", "GitHub CLI release token");
-for (const duplicate of ["build-release.mjs", "release-contract.mjs", "validate-with-spec.mjs"]) if (fs.existsSync(path.join(root, "scripts", duplicate))) throw new Error(`local spec copy is forbidden: scripts/${duplicate}`);
-if (fs.existsSync(path.join(root, "validation/spec-validator.json"))) throw new Error("local spec pin copy is forbidden");
+for (const match of workflow.matchAll(/^\s*-?\s*uses:\s*([^\s#]+)/gm)) if (!/^[^@\s]+@[a-f0-9]{40}$/.test(match[1])) throw new Error(`workflow action is not commit-pinned: ${match[1]}`);
+for (const obsolete of ["stage.sh", "export PATH=", "tar -czf", "SOKSAK_PTYD_BIN", "SOKSAK_CORE_WORKTREE"]) if (workflow.includes(obsolete)) throw new Error(`workflow retains obsolete behavior: ${obsolete}`);
 console.log("release workflow contract: passed");
