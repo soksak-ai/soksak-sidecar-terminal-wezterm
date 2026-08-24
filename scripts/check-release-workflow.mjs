@@ -10,7 +10,13 @@ const ownerPath = `soksak-sidecars/${manifest.id}`;
 const targets = JSON.parse(fs.readFileSync(path.join(root, "release/targets.json"), "utf8"));
 const requireText = (value, label) => { if (!workflow.includes(value)) throw new Error(`release workflow is missing ${label}: ${value}`); };
 const cargo = fs.readFileSync(path.join(root, "Cargo.toml"), "utf8");
-const stage = fs.readFileSync(path.join(root, "stage.sh"), "utf8");
+const makefile = fs.readFileSync(path.join(root, "Makefile"), "utf8");
+const stage = fs.readFileSync(path.join(root, "scripts/stage-built.sh"), "utf8");
+for (const target of ["preflight", "prepare", "build", "stage", "verify"]) {
+  if (!new RegExp(`^${target}:`, "m").test(makefile)) throw new Error(`Makefile target is missing: ${target}`);
+}
+requireText('make verify TARGET="${{ matrix.target }}"', "owner Make verification");
+requireText('make stage TARGET="${{ matrix.target }}" OUT=dist', "owner Make staging");
 if (!/^edition = "2024"$/m.test(cargo)) throw new Error("Rust packages must use edition 2024");
 if (/\bpath\s*=\s*"\.\.\//.test(cargo)) throw new Error("Cargo dependencies must not require sibling checkouts");
 if (!cargo.includes('rev = "f2f48219bde7a981bf4dd18ee193599639c65fe5"')) throw new Error("Cargo must pin the terminal sidecar kit commit");
