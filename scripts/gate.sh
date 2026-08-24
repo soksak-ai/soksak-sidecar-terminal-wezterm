@@ -9,20 +9,20 @@
 # 사용: scripts/gate.sh [<bench-out-dir>]
 #   bench-out-dir 를 주면 측정 결과를 거기에 남긴다(계약의 함대 게이트가 상대 가드를 볼 때 쓴다).
 set -euo pipefail
-export PATH="$HOME/.cargo/bin:$PATH"
 
 cd "$(dirname "$0")/.."
 SIDECAR="soksak-sidecar-terminal-wezterm"
-BENCH_OUT="${1:-}"
+TARGET="${1:?target triple is required}"
+BENCH_OUT="${2:-}"
 
 echo "== $SIDECAR: conformance and owner tests"
-cargo test --release
+cargo test --locked --release --target "$TARGET"
 
 echo "== $SIDECAR: performance budget (SPEC.md §14.2)"
 if [ -n "$BENCH_OUT" ]; then
-  SOKSAK_BENCH_OUT="$BENCH_OUT" cargo test --release --test bench -- --ignored --nocapture
+  SOKSAK_BENCH_OUT="$BENCH_OUT" cargo test --locked --release --target "$TARGET" --test bench -- --ignored --nocapture
 else
-  cargo test --release --test bench -- --ignored --nocapture
+  cargo test --locked --release --target "$TARGET" --test bench -- --ignored --nocapture
 fi
 
 echo "== $SIDECAR: GATE PASS"
