@@ -1702,16 +1702,17 @@ dependencies = [
 
 [[package]]
 name = "soksak-contract-terminal"
-version = "0.0.1"
-source = "git+https://github.com/soksak-ai/soksak-contract-terminal?rev=cab0691a1a01fca7436ac29f6cc2850245788ea6#cab0691a1a01fca7436ac29f6cc2850245788ea6"
+version = "0.0.3"
+source = "git+https://github.com/soksak-ai/soksak-contract-terminal?rev=a0421a07721338f94e7ac523a7936f6e6afd9e43#a0421a07721338f94e7ac523a7936f6e6afd9e43"
 dependencies = [
+ "serde",
  "serde_json",
 ]
 
 [[package]]
 name = "soksak-kit-sidecar-terminal"
-version = "0.0.7"
-source = "git+https://github.com/soksak-ai/soksak-kit-sidecar-terminal?rev=2bac8d2f396b23b88a40aa74e03f9166f487c187#2bac8d2f396b23b88a40aa74e03f9166f487c187"
+version = "0.0.10"
+source = "git+https://github.com/soksak-ai/soksak-kit-sidecar-terminal?rev=07d1453fe4a8cb90645d88ce52c93045254a2af5#07d1453fe4a8cb90645d88ce52c93045254a2af5"
 dependencies = [
  "aes-gcm",
  "base64",
@@ -1725,7 +1726,7 @@ dependencies = [
 
 [[package]]
 name = "soksak-sidecar-terminal-wezterm"
-version = "0.0.13"
+version = "0.0.15"
 dependencies = [
  "base64",
  "interprocess",
