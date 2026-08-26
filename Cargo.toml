@@ -6,7 +6,7 @@
 # engine name lives in this unit's name only; the contract is engine-neutral.
 [package]
 name = "soksak-sidecar-terminal-wezterm"
-version = "0.0.15"
+version = "0.0.16"
 edition = "2024"
 publish = false
 description = "Terminal-domain restore sidecar on the wezterm-term VT engine: mirrors PTY session output into screen state (scrollback, alt-screen, private modes), serializes it into replayable paint for warm/cold restore, and checkpoints sealed plaintext through the core PTY daemon."
@@ -45,7 +45,7 @@ base64 = "0.22"
 # sockets on Unix and named pipes on Windows behind one API, inserting no framing of its
 # own, so the NDJSON + length-prefixed tee protocol is byte-for-byte unchanged.
 interprocess = "2"
-soksak-kit-sidecar-terminal = { git = "https://github.com/soksak-ai/soksak-kit-sidecar-terminal", rev = "07d1453fe4a8cb90645d88ce52c93045254a2af5", features = ["integration-tests"] }
+soksak-kit-sidecar-terminal = { git = "https://github.com/soksak-ai/soksak-kit-sidecar-terminal", rev = "f45e3924f1e79dc8232447342c40f5a413cab148", features = ["integration-tests"] }
 
 # Redirect the survival service's own stderr to a home log so checkpoint failures are
 # visible (the plugin spawns it over a stdio Channel that drops stderr). The redirect is
