@@ -373,6 +373,8 @@ fn cell_of(cr: &CellRef) -> GridCell {
         spacer: false,
         wrapline: false,
         zerowidth,
+        // This engine does not track OSC 8; capabilities.hyperlinks stays false.
+        link: None,
     }
 }
 
@@ -414,6 +416,8 @@ fn blank_cell() -> GridCell {
         spacer: false,
         wrapline: false,
         zerowidth: Vec::new(),
+        // This engine does not track OSC 8; capabilities.hyperlinks stays false.
+        link: None,
     }
 }
 

@@ -1,5 +1,7 @@
 use crate::engine::Engine;
-use soksak_kit_sidecar_terminal::mirror::{RecoveryMirror, TerminalCell, TerminalModes};
+use soksak_kit_sidecar_terminal::mirror::{
+    MirrorCapabilities, RecoveryMirror, TerminalCell, TerminalFrame, TerminalModes,
+};
 
 pub struct Mirror(RecoveryMirror<Engine>);
 
@@ -43,7 +45,13 @@ impl Mirror {
     pub fn line_cells(&self, line: i32) -> Vec<TerminalCell> {
         self.0.line_cells(line)
     }
-    pub fn frame(&self) -> soksak_kit_sidecar_terminal::mirror::TerminalFrame {
+    pub fn capabilities(&self) -> MirrorCapabilities {
+        self.0.capabilities()
+    }
+    pub fn frame_at(&self, offset: usize) -> TerminalFrame {
+        self.0.frame_at(offset)
+    }
+    pub fn frame(&self) -> TerminalFrame {
         self.0.frame()
     }
 }
