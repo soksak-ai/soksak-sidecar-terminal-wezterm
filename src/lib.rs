@@ -45,4 +45,16 @@ impl soksak_kit_sidecar_terminal::TerminalStateMirror for Mirror {
     fn suppressed_replies(&self) -> u64 {
         Mirror::suppressed_replies(self)
     }
+    fn cols(&self) -> u16 {
+        Mirror::cols(self)
+    }
+    fn rows(&self) -> u16 {
+        Mirror::rows(self)
+    }
+    fn cursor(&self) -> (usize, usize) {
+        Mirror::cursor(self)
+    }
+    fn line_cells(&self, line: i32) -> Vec<soksak_kit_sidecar_terminal::mirror::TerminalCell> {
+        Mirror::line_cells(self, line)
+    }
 }

@@ -252,9 +252,9 @@ checksum = "8f1fe948ff07f4bd06c30984e69f5b4899c516a3ef74f34df92a2df2ab535495"
 
 [[package]]
 name = "cc"
-version = "1.2.67"
+version = "1.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e17dd265a7d0f31ef544e1b20e03add05d3b45b491b633b10d67145d2acc1a38"
+checksum = "0ad534f4357a5264cce5019c989cf66a4f0dc4e0d1b1d15f8aacec0ff7360273"
 dependencies = [
  "find-msvc-tools",
  "jobserver",
@@ -514,9 +514,9 @@ dependencies = [
 
 [[package]]
 name = "find-msvc-tools"
-version = "0.1.9"
+version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
+checksum = "d45db016d36b838f563236e9193d0ee6ce38f3f68b6c94e914b4929c96bbb890"
 
 [[package]]
 name = "finl_unicode"
@@ -1701,6 +1701,11 @@ dependencies = [
 ]
 
 [[package]]
+name = "soksak-contract-surface"
+version = "0.0.2"
+source = "git+https://github.com/soksak-ai/soksak-contract-surface?rev=b095b92660ff617c345f9a7eb2b8ab4ce9986cd5#b095b92660ff617c345f9a7eb2b8ab4ce9986cd5"
+
+[[package]]
 name = "soksak-contract-terminal"
 version = "0.0.3"
 source = "git+https://github.com/soksak-ai/soksak-contract-terminal?rev=a0421a07721338f94e7ac523a7936f6e6afd9e43#a0421a07721338f94e7ac523a7936f6e6afd9e43"
@@ -1712,16 +1717,18 @@ dependencies = [
 [[package]]
 name = "soksak-kit-sidecar-terminal"
 version = "0.0.14"
-source = "git+https://github.com/soksak-ai/soksak-kit-sidecar-terminal?rev=eec93c31c2416e8f92025e01b965b7d2d87c4e5a#eec93c31c2416e8f92025e01b965b7d2d87c4e5a"
+source = "git+https://github.com/soksak-ai/soksak-kit-sidecar-terminal?rev=1b82406cd297b515c389164e9d1e757757a66c38#1b82406cd297b515c389164e9d1e757757a66c38"
 dependencies = [
  "aes-gcm",
  "base64",
+ "cc",
  "getrandom 0.3.4",
  "interprocess",
  "serde",
  "serde_json",
  "sha2",
  "soksak-contract-control",
+ "soksak-contract-surface",
 ]
 
 [[package]]
