@@ -1703,7 +1703,7 @@ dependencies = [
 [[package]]
 name = "soksak-contract-surface"
 version = "0.0.2"
-source = "git+https://github.com/soksak-ai/soksak-contract-surface?rev=b095b92660ff617c345f9a7eb2b8ab4ce9986cd5#b095b92660ff617c345f9a7eb2b8ab4ce9986cd5"
+source = "git+https://github.com/soksak-ai/soksak-contract-surface?rev=e03e3cfeeb1b44c950711b45cd614139af80005d#e03e3cfeeb1b44c950711b45cd614139af80005d"
 
 [[package]]
 name = "soksak-contract-terminal"
@@ -1717,7 +1717,7 @@ dependencies = [
 [[package]]
 name = "soksak-kit-sidecar-terminal"
 version = "0.0.14"
-source = "git+https://github.com/soksak-ai/soksak-kit-sidecar-terminal?rev=1b82406cd297b515c389164e9d1e757757a66c38#1b82406cd297b515c389164e9d1e757757a66c38"
+source = "git+https://github.com/soksak-ai/soksak-kit-sidecar-terminal?rev=3fe74281ecbc8f73d9a62c185f0178fdf4493ccd#3fe74281ecbc8f73d9a62c185f0178fdf4493ccd"
 dependencies = [
  "aes-gcm",
  "base64",
