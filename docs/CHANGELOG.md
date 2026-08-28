@@ -5,6 +5,8 @@ documents in this directory.
 
 ## 2026-08-28
 
+- Terminal theme overrides now come from WezTerm's explicit color override state.
+- An explicit color equal to the configured base remains present until OSC reset or RIS.
 - Cursor shape and blink state now come from WezTerm's terminal model.
 - DECSET/DECRST 12 now changes only cursor blink state; the selected cursor shape remains unchanged.
 - The renderer receives WezTerm's 800 ms cursor animation policy.

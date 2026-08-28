@@ -20,7 +20,7 @@ The restore domain is engine-agnostic: the tee consumer `daemon.rs`, the checkpo
 policy `checkpoint.rs`, the mirror + ANSI serializer `mirror.rs`, the daemon wire
 `proto.rs`, and the service runtime `service.rs`/`main.rs` never name an engine. The
 engine lives behind one face in `engine.rs`, implemented here on `wezterm-term`,
-exposing `feed`/`resize`/grid·mode·cursor reads. A different engine unit swaps that
+exposing `feed`/`resize`/grid·mode·cursor·theme-override reads. A different engine unit swaps that
 one file; the restore domain logic stays put.
 
 ## Graded against the declared reference state
@@ -64,9 +64,9 @@ This unit ships the wezterm-term engine (MIT) and carries its `LICENSE` +
 `THIRD-PARTY-NOTICES`. No license crosses between units. The conformance judge is a dev-dependency and ships
 nowhere, so its Apache-2.0 does not reach this unit either.
 
-## Qualification verdict
+## Dependency identity
 
-Conformance result against `soksak-spec-sidecar-terminal`: **7 of 7**, and the unit
-clears the contract-owned performance budget. The owner pins `soksak-ai/wezterm` commit
-`eebf29473eb5b7a07c9cb5c833d42fa90fb00777`; no local checkout or path dependency is
-part of the build.
+The owner pins `https://github.com/min-median-max/wezterm` commit
+`d91c7cee1259c49d6860e6cf33d4cca606c61046` in `Cargo.toml`. No local checkout or path dependency
+is part of the build. Current qualification is determined only by the owner `make verify` gate
+above, not by a copied pass count in this document.
