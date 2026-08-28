@@ -10,6 +10,11 @@ use soksak_kit_sidecar_terminal::frame::{FrameBaseline, delta};
 use soksak_sidecar_terminal_wezterm::Mirror;
 
 #[test]
+fn cursor_style() {
+    contract::assert_cursor_style_conforms::<SidecarMirror>();
+}
+
+#[test]
 fn mid_escape_tail() {
     contract::assert_conforms::<SidecarMirror>(Fixture::MidEscapeTail);
 }
