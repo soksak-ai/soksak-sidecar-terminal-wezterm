@@ -1716,8 +1716,8 @@ dependencies = [
 
 [[package]]
 name = "soksak-kit-sidecar-terminal"
-version = "0.0.15"
-source = "git+https://github.com/soksak-ai/soksak-kit-sidecar-terminal?rev=6feda0db99cc439d27b47fb29873e85279b8cf3e#6feda0db99cc439d27b47fb29873e85279b8cf3e"
+version = "0.0.16"
+source = "git+https://github.com/soksak-ai/soksak-kit-sidecar-terminal?rev=8d28eeb9fc5449d70aa3ca967151355c0c824450#8d28eeb9fc5449d70aa3ca967151355c0c824450"
 dependencies = [
  "aes-gcm",
  "base64",
@@ -1733,7 +1733,7 @@ dependencies = [
 
 [[package]]
 name = "soksak-sidecar-terminal-wezterm"
-version = "0.0.21"
+version = "0.0.22"
 dependencies = [
  "base64",
  "interprocess",
