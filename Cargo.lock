@@ -1707,8 +1707,8 @@ source = "git+https://github.com/soksak-ai/soksak-contract-surface?rev=e03e3cfee
 
 [[package]]
 name = "soksak-contract-terminal"
-version = "0.0.3"
-source = "git+https://github.com/soksak-ai/soksak-contract-terminal?rev=a0421a07721338f94e7ac523a7936f6e6afd9e43#a0421a07721338f94e7ac523a7936f6e6afd9e43"
+version = "0.0.4"
+source = "git+https://github.com/soksak-ai/soksak-contract-terminal?rev=e2d60b034148fdf6b43637bba41e9a068515c0a8#e2d60b034148fdf6b43637bba41e9a068515c0a8"
 dependencies = [
  "serde",
  "serde_json",
@@ -1716,8 +1716,8 @@ dependencies = [
 
 [[package]]
 name = "soksak-kit-sidecar-terminal"
-version = "0.0.14"
-source = "git+https://github.com/soksak-ai/soksak-kit-sidecar-terminal?rev=1f0e6a6d1acd8c6eaec733f76463f907fbc055c2#1f0e6a6d1acd8c6eaec733f76463f907fbc055c2"
+version = "0.0.15"
+source = "git+https://github.com/soksak-ai/soksak-kit-sidecar-terminal?rev=6feda0db99cc439d27b47fb29873e85279b8cf3e#6feda0db99cc439d27b47fb29873e85279b8cf3e"
 dependencies = [
  "aes-gcm",
  "base64",

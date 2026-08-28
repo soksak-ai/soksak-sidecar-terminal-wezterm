@@ -45,7 +45,7 @@ base64 = "0.22"
 # sockets on Unix and named pipes on Windows behind one API, inserting no framing of its
 # own, so the NDJSON + length-prefixed tee protocol is byte-for-byte unchanged.
 interprocess = "2"
-soksak-kit-sidecar-terminal = { git = "https://github.com/soksak-ai/soksak-kit-sidecar-terminal", rev = "1f0e6a6d1acd8c6eaec733f76463f907fbc055c2", features = ["integration-tests"] }
+soksak-kit-sidecar-terminal = { git = "https://github.com/soksak-ai/soksak-kit-sidecar-terminal", rev = "6feda0db99cc439d27b47fb29873e85279b8cf3e", features = ["integration-tests"] }
 
 # Redirect the survival service's own stderr to a home log so checkpoint failures are
 # visible (the plugin spawns it over a stdio Channel that drops stderr). The redirect is
@@ -60,7 +60,7 @@ windows-sys = { version = "0.59", features = ["Win32_System_Console", "Win32_Fou
 # The contract and its acceptance suite: the corpus, the declared reference states, and the assertions.
 # It has no engine of its own — the standard is the declared screen state, not what any
 # implementation does. Dev-only: nothing from it ships.
-soksak-contract-terminal = { git = "https://github.com/soksak-ai/soksak-contract-terminal", rev = "a0421a07721338f94e7ac523a7936f6e6afd9e43" }
+soksak-contract-terminal = { git = "https://github.com/soksak-ai/soksak-contract-terminal", rev = "e2d60b034148fdf6b43637bba41e9a068515c0a8" }
 
 # This repository is its own Cargo workspace.
 [workspace]
