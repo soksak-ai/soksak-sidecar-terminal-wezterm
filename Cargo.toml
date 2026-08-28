@@ -32,11 +32,12 @@ path = "src/main.rs"
 # advance_bytes_observed, screen line() accessor); wrap-before-placement for a double-width grapheme
 # when one column remains;
 # inline true-color storage by value;
-# the declared engine crates use
+# carries true color by value instead of a per-cell heap allocation; and explicit OSC color
+# override state that remains distinct from the effective palette. term and termwiz come
 # the same revision, so the cell/color/attribute and Action types unify.
-wezterm-term = { git = "https://github.com/min-median-max/wezterm", rev = "5fa2bb65322d35739777e981c269ca2feba8a55d" }
-wezterm-surface = { git = "https://github.com/min-median-max/wezterm", rev = "5fa2bb65322d35739777e981c269ca2feba8a55d" }
-termwiz = { git = "https://github.com/min-median-max/wezterm", rev = "5fa2bb65322d35739777e981c269ca2feba8a55d" }
+wezterm-term = { git = "https://github.com/min-median-max/wezterm", rev = "d91c7cee1259c49d6860e6cf33d4cca606c61046" }
+wezterm-surface = { git = "https://github.com/min-median-max/wezterm", rev = "d91c7cee1259c49d6860e6cf33d4cca606c61046" }
+termwiz = { git = "https://github.com/min-median-max/wezterm", rev = "d91c7cee1259c49d6860e6cf33d4cca606c61046" }
 # Wire — the daemon speaks NDJSON + base64 payloads; this unit reimplements the
 # documented shape (proto module) rather than linking the core crate.
 serde_json = "1"
@@ -46,7 +47,7 @@ base64 = "0.22"
 # sockets on Unix and named pipes on Windows behind one API, inserting no framing of its
 # own, so the NDJSON + length-prefixed tee protocol is byte-for-byte unchanged.
 interprocess = "2"
-soksak-kit-sidecar-terminal = { git = "https://github.com/soksak-ai/soksak-kit-sidecar-terminal", rev = "3994230dfe7ba7c78be491efe595bb7102a0d6f2", features = ["integration-tests"] }
+soksak-kit-sidecar-terminal = { git = "https://github.com/soksak-ai/soksak-kit-sidecar-terminal", rev = "a83a8333d4f72fff00bc318541013b7449661299", features = ["integration-tests"] }
 
 # Redirect the survival service's own stderr to a home log so checkpoint failures are
 # visible (the plugin spawns it over a stdio Channel that drops stderr). The redirect is
