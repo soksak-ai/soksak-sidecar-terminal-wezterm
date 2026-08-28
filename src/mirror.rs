@@ -1,6 +1,7 @@
 use crate::engine::Engine;
 use soksak_kit_sidecar_terminal::mirror::{
-    MirrorCapabilities, RecoveryMirror, TerminalCell, TerminalFrame, TerminalModes,
+    MirrorCapabilities, RecoveryMirror, TerminalCell, TerminalCursorAnimation, TerminalCursorStyle,
+    TerminalFrame, TerminalModes,
 };
 
 pub struct Mirror(RecoveryMirror<Engine>);
@@ -35,6 +36,12 @@ impl Mirror {
     }
     pub fn cursor(&self) -> (usize, usize) {
         self.0.cursor()
+    }
+    pub fn cursor_style(&self) -> TerminalCursorStyle {
+        self.0.cursor_style()
+    }
+    pub fn cursor_animation(&self) -> TerminalCursorAnimation {
+        self.0.cursor_animation()
     }
     pub fn modes(&self) -> TerminalModes {
         self.0.modes()

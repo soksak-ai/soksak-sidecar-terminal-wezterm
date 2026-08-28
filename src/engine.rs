@@ -24,7 +24,8 @@ use std::sync::{Arc, Mutex};
 
 use soksak_kit_sidecar_terminal::mirror::TerminalEngine;
 pub use soksak_kit_sidecar_terminal::mirror::{
-    TerminalCell as GridCell, TerminalColor as ColorSnap, TerminalModes as ModeSnap,
+    TerminalCell as GridCell, TerminalColor as ColorSnap, TerminalCursorAnimation,
+    TerminalCursorShape, TerminalCursorStyle, TerminalModes as ModeSnap,
 };
 use termwiz::cell::{CellAttributes, Intensity, Underline};
 use termwiz::color::ColorAttribute;
@@ -33,6 +34,7 @@ use termwiz::escape::csi::{
 };
 use termwiz::escape::{Action, Esc, EscCode};
 use termwiz::surface::line::{CellRef, Line};
+use wezterm_surface::CursorShape as WezCursorShape;
 use wezterm_term::color::ColorPalette;
 use wezterm_term::{Terminal, TerminalConfiguration, TerminalSize};
 
@@ -240,6 +242,40 @@ impl Engine {
         (p.y.max(0) as usize, p.x)
     }
 
+    pub fn cursor_style(&self) -> TerminalCursorStyle {
+        let shape = self.term.cursor_pos().shape;
+        match shape {
+            WezCursorShape::Default | WezCursorShape::SteadyBlock => TerminalCursorStyle {
+                shape: TerminalCursorShape::Block,
+                blinking: false,
+            },
+            WezCursorShape::BlinkingBlock => TerminalCursorStyle {
+                shape: TerminalCursorShape::Block,
+                blinking: true,
+            },
+            WezCursorShape::SteadyUnderline => TerminalCursorStyle {
+                shape: TerminalCursorShape::Underline,
+                blinking: false,
+            },
+            WezCursorShape::BlinkingUnderline => TerminalCursorStyle {
+                shape: TerminalCursorShape::Underline,
+                blinking: true,
+            },
+            WezCursorShape::SteadyBar => TerminalCursorStyle {
+                shape: TerminalCursorShape::Bar,
+                blinking: false,
+            },
+            WezCursorShape::BlinkingBar => TerminalCursorStyle {
+                shape: TerminalCursorShape::Bar,
+                blinking: true,
+            },
+        }
+    }
+
+    pub fn cursor_animation(&self) -> TerminalCursorAnimation {
+        TerminalCursorAnimation { interval_ms: 800 }
+    }
+
     /// 현재 스크롤백(화면 위로 밀려난) 행 수. wezterm `scrollback_rows()` 는 전체 라인
     /// 수(scrollback+visible)라, 보이는 행 수를 빼야 진짜 스크롤백이다.
     pub fn history_size(&self) -> usize {
@@ -335,6 +371,12 @@ impl TerminalEngine for Engine {
     }
     fn cursor(&self) -> (usize, usize) {
         Engine::cursor(self)
+    }
+    fn cursor_style(&self) -> TerminalCursorStyle {
+        Engine::cursor_style(self)
+    }
+    fn cursor_animation(&self) -> TerminalCursorAnimation {
+        Engine::cursor_animation(self)
     }
     fn alt_active(&self) -> bool {
         Engine::alt_active(self)

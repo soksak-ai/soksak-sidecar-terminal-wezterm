@@ -54,6 +54,12 @@ impl soksak_kit_sidecar_terminal::TerminalStateMirror for Mirror {
     fn cursor(&self) -> (usize, usize) {
         Mirror::cursor(self)
     }
+    fn cursor_style(&self) -> soksak_kit_sidecar_terminal::mirror::TerminalCursorStyle {
+        Mirror::cursor_style(self)
+    }
+    fn cursor_animation(&self) -> soksak_kit_sidecar_terminal::mirror::TerminalCursorAnimation {
+        Mirror::cursor_animation(self)
+    }
     fn line_cells(&self, line: i32) -> Vec<soksak_kit_sidecar_terminal::mirror::TerminalCell> {
         Mirror::line_cells(self, line)
     }
