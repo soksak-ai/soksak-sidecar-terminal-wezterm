@@ -1,13 +1,16 @@
 SHELL := /bin/sh
 OUT ?= dist
 
-.PHONY: require-target preflight prepare build stage verify benchmark
+.PHONY: require-target preflight lock prepare build stage verify benchmark
 
 require-target:
 	@test '$(origin TARGET)' = 'command line' && test -n '$(TARGET)' || { echo 'TARGET must be an explicit Make command-line variable' >&2; exit 2; }
 
 preflight: require-target
 	@scripts/check-build-environment.sh '$(TARGET)'
+
+lock: preflight
+	@cargo metadata --format-version 1 > /dev/null
 
 prepare: preflight
 	@cargo fetch --locked --target '$(TARGET)'
