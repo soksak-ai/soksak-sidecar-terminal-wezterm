@@ -277,6 +277,24 @@ impl Engine {
         TerminalCursorAnimation { interval_ms: 800 }
     }
 
+    pub fn theme_overrides(&self) -> TerminalThemeOverrides {
+        let colors = self.term.color_overrides();
+        let rgb = |value: Option<&wezterm_term::color::SrgbaTuple>| {
+            value.map(|value| {
+                let (r, g, b, _) = value.to_srgb_u8();
+                TerminalRgb { r, g, b }
+            })
+        };
+        let mut overrides = TerminalThemeOverrides::default();
+        overrides.foreground = rgb(colors.foreground.as_ref());
+        overrides.background = rgb(colors.background.as_ref());
+        overrides.cursor = rgb(colors.cursor.as_ref());
+        for (slot, value) in overrides.ansi.iter_mut().zip(colors.colors.iter()) {
+            *slot = rgb(value.as_ref());
+        }
+        overrides
+    }
+
     /// 현재 스크롤백(화면 위로 밀려난) 행 수. wezterm `scrollback_rows()` 는 전체 라인
     /// 수(scrollback+visible)라, 보이는 행 수를 빼야 진짜 스크롤백이다.
     pub fn history_size(&self) -> usize {
@@ -395,7 +413,7 @@ impl TerminalEngine for Engine {
         self.captured_replies().len() as u64
     }
     fn theme_overrides(&self) -> TerminalThemeOverrides {
-        TerminalThemeOverrides::default()
+        Engine::theme_overrides(self)
     }
 }
 
