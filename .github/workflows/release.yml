@@ -73,7 +73,7 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
       - run: |
           make verify TARGET="${{ matrix.target }}"
-          make stage TARGET="${{ matrix.target }}" OUT=dist
+          make stage TARGET="${{ matrix.target }}" STAGE=dist
       - id: archive
         run: |
           version="${{ steps.identity.outputs.version }}"

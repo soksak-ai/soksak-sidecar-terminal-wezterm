@@ -35,6 +35,8 @@ behalf. The declared reference state is the sole correctness criterion for this 
 ```sh
 make lock TARGET=aarch64-apple-darwin
 make verify TARGET=aarch64-apple-darwin
+make stage TARGET=aarch64-apple-darwin STAGE=dist
+make attest TARGET=aarch64-apple-darwin OUT=/absolute/wezterm-release
 ```
 
 `make lock` is the only owner operation that projects changed Cargo declarations into
