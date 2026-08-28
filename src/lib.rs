@@ -63,4 +63,7 @@ impl soksak_kit_sidecar_terminal::TerminalStateMirror for Mirror {
     fn line_cells(&self, line: i32) -> Vec<soksak_kit_sidecar_terminal::mirror::TerminalCell> {
         Mirror::line_cells(self, line)
     }
+    fn theme_overrides(&self) -> soksak_kit_sidecar_terminal::mirror::TerminalThemeOverrides {
+        Mirror::theme_overrides(self)
+    }
 }

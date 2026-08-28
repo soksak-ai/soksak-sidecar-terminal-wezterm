@@ -1,7 +1,7 @@
 use crate::engine::Engine;
 use soksak_kit_sidecar_terminal::mirror::{
     MirrorCapabilities, RecoveryMirror, TerminalCell, TerminalCursorAnimation, TerminalCursorStyle,
-    TerminalFrame, TerminalModes,
+    TerminalFrame, TerminalModes, TerminalThemeOverrides,
 };
 
 pub struct Mirror(RecoveryMirror<Engine>);
@@ -60,5 +60,8 @@ impl Mirror {
     }
     pub fn frame(&self) -> TerminalFrame {
         self.0.frame()
+    }
+    pub fn theme_overrides(&self) -> TerminalThemeOverrides {
+        self.0.theme_overrides()
     }
 }
