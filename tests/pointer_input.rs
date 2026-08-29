@@ -35,11 +35,8 @@ fn wezterm_encoder_owns_sgr_press_drag_release_and_free_motion() {
         b"\x1b[<32;2;3M",
     );
     assert_eq!(
-        TerminalEngine::pointer_input(
-            &mut engine,
-            pointer(PointerPhase::Up, PointerButton::Left),
-        )
-        .unwrap(),
+        TerminalEngine::pointer_input(&mut engine, pointer(PointerPhase::Up, PointerButton::Left),)
+            .unwrap(),
         b"\x1b[<0;2;3m",
     );
 
