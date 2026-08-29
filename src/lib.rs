@@ -66,4 +66,26 @@ impl soksak_kit_sidecar_terminal::TerminalStateMirror for Mirror {
     fn theme_overrides(&self) -> soksak_kit_sidecar_terminal::mirror::TerminalThemeOverrides {
         Mirror::theme_overrides(self)
     }
+    fn selection_command(
+        &mut self,
+        request: &soksak_kit_sidecar_terminal::mirror::SelectionRequest,
+        offset: usize,
+    ) -> Result<soksak_kit_sidecar_terminal::mirror::SelectionSnapshot, String> {
+        Mirror::selection_command(self, request, offset)
+    }
+    fn selection_range(&self, line: i32) -> Option<(u16, u16)> {
+        Mirror::selection_range(self, line)
+    }
+    fn wheel_input(
+        &mut self,
+        input: soksak_kit_sidecar_terminal::mirror::EngineWheelInput,
+    ) -> Result<Vec<u8>, String> {
+        Mirror::wheel_input(self, input)
+    }
+    fn pointer_input(
+        &mut self,
+        input: soksak_kit_sidecar_terminal::mirror::EnginePointerInput,
+    ) -> Result<Vec<u8>, String> {
+        Mirror::pointer_input(self, input)
+    }
 }

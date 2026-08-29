@@ -24,6 +24,7 @@ use std::sync::{Arc, Mutex};
 
 use soksak_kit_sidecar_terminal::mirror::TerminalEngine;
 pub use soksak_kit_sidecar_terminal::mirror::{
+    EnginePointerInput, EngineSelectionPoint, EngineWheelInput, SelectionKind, SelectionModifiers,
     TerminalCell as GridCell, TerminalColor as ColorSnap, TerminalCursorAnimation,
     TerminalCursorShape, TerminalCursorStyle, TerminalModes as ModeSnap, TerminalRgb,
     TerminalThemeOverrides,
@@ -37,6 +38,10 @@ use termwiz::escape::{Action, Esc, EscCode};
 use termwiz::surface::line::{CellRef, Line};
 use wezterm_surface::CursorShape as WezCursorShape;
 use wezterm_term::color::ColorPalette;
+use wezterm_term::input::{
+    KeyModifiers as WezKeyModifiers, MouseButton as WezMouseButton, MouseEvent as WezMouseEvent,
+    MouseEventKind as WezMouseEventKind,
+};
 use wezterm_term::{Terminal, TerminalConfiguration, TerminalSize};
 
 /// 엔진이 유지하는 스크롤백 행 수. 바이트 충실 복원의 바닥 — 전체 의미 이력은
@@ -52,7 +57,7 @@ pub const MIRROR_SCROLLBACK_LINES: usize = 1000;
 // 없앤다 — feed 가 돌아온 시점에 답은 이미 여기 들어와 있다(배리어 불필요).
 
 struct ReplyState {
-    replies: Mutex<Vec<String>>,
+    replies: Mutex<Vec<Vec<u8>>>,
 }
 
 #[derive(Clone)]
@@ -64,7 +69,7 @@ impl std::io::Write for ReplyTap {
             .replies
             .lock()
             .unwrap_or_else(|e| e.into_inner())
-            .push(String::from_utf8_lossy(buf).into_owned());
+            .push(buf.to_vec());
         Ok(buf.len())
     }
     fn flush(&mut self) -> std::io::Result<()> {
@@ -230,7 +235,9 @@ impl Engine {
             .replies
             .lock()
             .unwrap_or_else(|e| e.into_inner())
-            .clone()
+            .iter()
+            .map(|bytes| String::from_utf8_lossy(bytes).into_owned())
+            .collect()
     }
 
     pub fn alt_active(&self) -> bool {
@@ -306,6 +313,57 @@ impl Engine {
 
     pub fn modes(&self) -> ModeSnap {
         self.modes.snap
+    }
+
+    pub fn pointer_input(&mut self, input: EnginePointerInput) -> Result<Vec<u8>, String> {
+        let kind = match input.phase {
+            soksak_kit_sidecar_terminal::mirror::PointerPhase::Down => WezMouseEventKind::Press,
+            soksak_kit_sidecar_terminal::mirror::PointerPhase::Up => WezMouseEventKind::Release,
+            soksak_kit_sidecar_terminal::mirror::PointerPhase::Move => WezMouseEventKind::Move,
+        };
+        let button = match input.button {
+            soksak_kit_sidecar_terminal::mirror::PointerButton::None => WezMouseButton::None,
+            soksak_kit_sidecar_terminal::mirror::PointerButton::Left => WezMouseButton::Left,
+            soksak_kit_sidecar_terminal::mirror::PointerButton::Middle => WezMouseButton::Middle,
+            soksak_kit_sidecar_terminal::mirror::PointerButton::Right => WezMouseButton::Right,
+        };
+        let mut modifiers = WezKeyModifiers::NONE;
+        if input.modifiers.shift {
+            modifiers.insert(WezKeyModifiers::SHIFT);
+        }
+        if input.modifiers.alt || input.modifiers.meta {
+            modifiers.insert(WezKeyModifiers::ALT);
+        }
+        if input.modifiers.control {
+            modifiers.insert(WezKeyModifiers::CTRL);
+        }
+        let start = self
+            .state
+            .replies
+            .lock()
+            .unwrap_or_else(|error| error.into_inner())
+            .len();
+        self.term
+            .mouse_event(WezMouseEvent {
+                kind,
+                x: usize::from(input.col),
+                y: i64::from(input.row),
+                x_pixel_offset: 0,
+                y_pixel_offset: 0,
+                button,
+                modifiers,
+            })
+            .map_err(|error| format!("WezTerm mouse encoder failed: {error}"))?;
+        let mut writes = self
+            .state
+            .replies
+            .lock()
+            .unwrap_or_else(|error| error.into_inner());
+        let output = writes.drain(start..).flatten().collect::<Vec<_>>();
+        if output.is_empty() {
+            return Err("WEZTERM_POINTER_MODE_CHANGED: pointer phase is not reported".into());
+        }
+        Ok(output)
     }
 
     /// 한 행(line index; 0..rows = 보이는 화면, 음수 = 스크롤백)을 엔진-중립 셀 벡터로
@@ -415,6 +473,34 @@ impl TerminalEngine for Engine {
     fn theme_overrides(&self) -> TerminalThemeOverrides {
         Engine::theme_overrides(self)
     }
+    fn selection_begin(
+        &mut self,
+        _kind: SelectionKind,
+        _point: EngineSelectionPoint,
+        _modifiers: SelectionModifiers,
+    ) -> Result<(), String> {
+        Err("WezTerm selection input is not implemented".into())
+    }
+    fn selection_update(
+        &mut self,
+        _point: EngineSelectionPoint,
+        _modifiers: SelectionModifiers,
+    ) -> Result<(), String> {
+        Err("WezTerm selection input is not implemented".into())
+    }
+    fn selection_clear(&mut self) {}
+    fn selection_text(&self) -> Option<String> {
+        None
+    }
+    fn selection_range(&self, _line: i32) -> Option<(u16, u16)> {
+        None
+    }
+    fn wheel_input(&mut self, _input: EngineWheelInput) -> Result<Vec<u8>, String> {
+        Err("WezTerm wheel input is not implemented".into())
+    }
+    fn pointer_input(&mut self, input: EnginePointerInput) -> Result<Vec<u8>, String> {
+        Engine::pointer_input(self, input)
+    }
 }
 
 fn cell_of(cr: &CellRef) -> GridCell {
@@ -508,9 +594,8 @@ mod tests {
     #[test]
     fn engine_exposes_raw_osc_color_overrides() {
         let mut engine = Engine::new(4, 1);
-        engine.feed(
-            b"\x1b]4;1;#123456\x07\x1b]10;#abcdef\x07\x1b]11;#223344\x07\x1b]12;#654321\x07",
-        );
+        engine
+            .feed(b"\x1b]4;1;#123456\x07\x1b]10;#abcdef\x07\x1b]11;#223344\x07\x1b]12;#654321\x07");
         let colors = TerminalEngine::theme_overrides(&engine);
         assert_eq!(
             colors.ansi[1],
