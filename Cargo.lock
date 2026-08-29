@@ -1695,7 +1695,7 @@ checksum = "8ed6a63f02c8539c91a8685a86f4099661ba3da017932f6ebbea6de3f0fa7c90"
 [[package]]
 name = "soksak-contract-control"
 version = "0.0.5"
-source = "git+https://github.com/soksak-ai/soksak-contract-control?rev=49d302c230a8#49d302c230a8a44f3dd421107dc282482aa929e9"
+source = "git+https://github.com/soksak-ai/soksak-contract-control?rev=d37e5c3cc521#d37e5c3cc521f64ed54bc07500937838640258b4"
 dependencies = [
  "serde",
  "sha2",
@@ -1717,8 +1717,8 @@ dependencies = [
 
 [[package]]
 name = "soksak-kit-sidecar-terminal"
-version = "0.0.22"
-source = "git+https://github.com/soksak-ai/soksak-kit-sidecar-terminal?rev=702ed95#702ed95217100d0bbed7cfa9777184277a77ca9b"
+version = "0.0.23"
+source = "git+https://github.com/soksak-ai/soksak-kit-sidecar-terminal?rev=e23a4b9#e23a4b988df9ccff9f477103f2fe32760d0b5123"
 dependencies = [
  "aes-gcm",
  "base64",
@@ -1734,7 +1734,7 @@ dependencies = [
 
 [[package]]
 name = "soksak-sidecar-terminal-wezterm"
-version = "0.0.30"
+version = "0.0.31"
 dependencies = [
  "base64",
  "interprocess",
