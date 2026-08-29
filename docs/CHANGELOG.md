@@ -3,6 +3,11 @@
 This file records completed changes. Current behavior is defined by the terminal contract and the
 documents in this directory.
 
+## 2026-08-29
+
+- Pointer press, motion, and release use WezTerm's live terminal mouse input API.
+- Selection and wheel remain explicit unsupported operations.
+
 ## 2026-08-28
 
 - Terminal theme overrides now come from WezTerm's explicit color override state.

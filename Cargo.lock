@@ -1739,7 +1739,7 @@ dependencies = [
 
 [[package]]
 name = "soksak-sidecar-terminal-wezterm"
-version = "0.0.32"
+version = "0.0.33"
 dependencies = [
  "base64",
  "interprocess",
