@@ -15,11 +15,11 @@ wezterm-term  (the restore engine — MIT)
 The headless terminal model (parser, grid, scrollback, modes) is the
 `wezterm-term` crate from the WezTerm terminal emulator. WezTerm does not publish
 `wezterm-term` to crates.io, so this unit consumes them
-from a fork of WezTerm (soksak-ai/wezterm) pinned to one commit, carrying the same MIT
+from a fork of WezTerm (min-median-max/wezterm) pinned to one commit, carrying the same MIT
 license and attribution.
 
   Homepage:  https://github.com/wezterm/wezterm
-  Fork:      https://github.com/soksak-ai/wezterm
+  Fork:      https://github.com/min-median-max/wezterm
   License:   MIT
 
   Copyright (c) 2018 Wez Furlong
