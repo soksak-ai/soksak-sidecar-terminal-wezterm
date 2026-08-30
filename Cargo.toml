@@ -33,11 +33,12 @@ path = "src/main.rs"
 # when one column remains;
 # inline true-color storage by value;
 # carries true color by value instead of a per-cell heap allocation; and explicit OSC color
-# override state that remains distinct from the effective palette. term and termwiz come
+# override state that remains distinct from the effective palette; and native, distinct DEC9
+# and DEC1001 mouse protocol state. term and termwiz come
 # the same revision, so the cell/color/attribute and Action types unify.
-wezterm-term = { git = "https://github.com/min-median-max/wezterm", rev = "d91c7cee1259c49d6860e6cf33d4cca606c61046" }
-wezterm-surface = { git = "https://github.com/min-median-max/wezterm", rev = "d91c7cee1259c49d6860e6cf33d4cca606c61046" }
-termwiz = { git = "https://github.com/min-median-max/wezterm", rev = "d91c7cee1259c49d6860e6cf33d4cca606c61046" }
+wezterm-term = { git = "https://github.com/min-median-max/wezterm", rev = "17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f" }
+wezterm-surface = { git = "https://github.com/min-median-max/wezterm", rev = "17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f" }
+termwiz = { git = "https://github.com/min-median-max/wezterm", rev = "17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f" }
 # Wire — the daemon speaks NDJSON + base64 payloads; this unit reimplements the
 # documented shape (proto module) rather than linking the core crate.
 serde_json = "1"
@@ -47,7 +48,7 @@ base64 = "0.22"
 # sockets on Unix and named pipes on Windows behind one API, inserting no framing of its
 # own, so the NDJSON + length-prefixed tee protocol is byte-for-byte unchanged.
 interprocess = "2"
-soksak-kit-sidecar-terminal = { git = "https://github.com/soksak-ai/soksak-kit-sidecar-terminal", rev = "e840d6e942b4e9d07f6d78a0835ad9d256c7317b", features = ["integration-tests"] }
+soksak-kit-sidecar-terminal = { git = "https://github.com/soksak-ai/soksak-kit-sidecar-terminal", rev = "20fb2d73d13e5bcde592380d3052c5d2204a592f", features = ["integration-tests"] }
 
 # Redirect the survival service's own stderr to a home log so checkpoint failures are
 # visible (the plugin spawns it over a stdio Channel that drops stderr). The redirect is

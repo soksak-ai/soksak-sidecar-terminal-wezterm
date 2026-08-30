@@ -505,7 +505,7 @@ dependencies = [
 [[package]]
 name = "filedescriptor"
 version = "0.8.3"
-source = "git+https://github.com/min-median-max/wezterm?rev=d91c7cee1259c49d6860e6cf33d4cca606c61046#d91c7cee1259c49d6860e6cf33d4cca606c61046"
+source = "git+https://github.com/min-median-max/wezterm?rev=17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f#17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f"
 dependencies = [
  "libc",
  "thiserror 1.0.69",
@@ -1703,8 +1703,8 @@ dependencies = [
 
 [[package]]
 name = "soksak-contract-surface"
-version = "0.0.8"
-source = "git+https://github.com/soksak-ai/soksak-contract-surface?rev=4bcf917cd104713bf934ee89afb81799466d2f3f#4bcf917cd104713bf934ee89afb81799466d2f3f"
+version = "0.0.9"
+source = "git+https://github.com/soksak-ai/soksak-contract-surface?rev=f3c3b22#f3c3b22f780850cb222e5eeb862eff59518766eb"
 dependencies = [
  "base64",
  "serde",
@@ -1722,8 +1722,8 @@ dependencies = [
 
 [[package]]
 name = "soksak-kit-sidecar-terminal"
-version = "0.0.31"
-source = "git+https://github.com/soksak-ai/soksak-kit-sidecar-terminal?rev=e840d6e942b4e9d07f6d78a0835ad9d256c7317b#e840d6e942b4e9d07f6d78a0835ad9d256c7317b"
+version = "0.0.34"
+source = "git+https://github.com/soksak-ai/soksak-kit-sidecar-terminal?rev=20fb2d73d13e5bcde592380d3052c5d2204a592f#20fb2d73d13e5bcde592380d3052c5d2204a592f"
 dependencies = [
  "aes-gcm",
  "base64",
@@ -1828,7 +1828,7 @@ dependencies = [
 [[package]]
 name = "termwiz"
 version = "0.24.0"
-source = "git+https://github.com/min-median-max/wezterm?rev=d91c7cee1259c49d6860e6cf33d4cca606c61046#d91c7cee1259c49d6860e6cf33d4cca606c61046"
+source = "git+https://github.com/min-median-max/wezterm?rev=17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f#17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f"
 dependencies = [
  "anyhow",
  "bitflags 2.13.0",
@@ -2045,7 +2045,7 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 [[package]]
 name = "vtparse"
 version = "0.7.0"
-source = "git+https://github.com/min-median-max/wezterm?rev=d91c7cee1259c49d6860e6cf33d4cca606c61046#d91c7cee1259c49d6860e6cf33d4cca606c61046"
+source = "git+https://github.com/min-median-max/wezterm?rev=17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f#17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f"
 dependencies = [
  "utf8parse",
 ]
@@ -2119,7 +2119,7 @@ checksum = "a28ac98ddc8b9274cb41bb4d9d4d5c425b6020c50c46f25559911905610b4a88"
 [[package]]
 name = "wezterm-bidi"
 version = "0.2.3"
-source = "git+https://github.com/min-median-max/wezterm?rev=d91c7cee1259c49d6860e6cf33d4cca606c61046#d91c7cee1259c49d6860e6cf33d4cca606c61046"
+source = "git+https://github.com/min-median-max/wezterm?rev=17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f#17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f"
 dependencies = [
  "log",
  "wezterm-dynamic",
@@ -2128,7 +2128,7 @@ dependencies = [
 [[package]]
 name = "wezterm-blob-leases"
 version = "0.1.1"
-source = "git+https://github.com/min-median-max/wezterm?rev=d91c7cee1259c49d6860e6cf33d4cca606c61046#d91c7cee1259c49d6860e6cf33d4cca606c61046"
+source = "git+https://github.com/min-median-max/wezterm?rev=17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f#17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f"
 dependencies = [
  "getrandom 0.3.4",
  "sha2",
@@ -2139,7 +2139,7 @@ dependencies = [
 [[package]]
 name = "wezterm-cell"
 version = "0.1.0"
-source = "git+https://github.com/min-median-max/wezterm?rev=d91c7cee1259c49d6860e6cf33d4cca606c61046#d91c7cee1259c49d6860e6cf33d4cca606c61046"
+source = "git+https://github.com/min-median-max/wezterm?rev=17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f#17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f"
 dependencies = [
  "finl_unicode",
  "image",
@@ -2158,7 +2158,7 @@ dependencies = [
 [[package]]
 name = "wezterm-char-props"
 version = "0.1.3"
-source = "git+https://github.com/min-median-max/wezterm?rev=d91c7cee1259c49d6860e6cf33d4cca606c61046#d91c7cee1259c49d6860e6cf33d4cca606c61046"
+source = "git+https://github.com/min-median-max/wezterm?rev=17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f#17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f"
 dependencies = [
  "phf",
  "serde",
@@ -2168,7 +2168,7 @@ dependencies = [
 [[package]]
 name = "wezterm-color-types"
 version = "0.3.0"
-source = "git+https://github.com/min-median-max/wezterm?rev=d91c7cee1259c49d6860e6cf33d4cca606c61046#d91c7cee1259c49d6860e6cf33d4cca606c61046"
+source = "git+https://github.com/min-median-max/wezterm?rev=17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f#17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f"
 dependencies = [
  "csscolorparser",
  "deltae",
@@ -2180,7 +2180,7 @@ dependencies = [
 [[package]]
 name = "wezterm-dynamic"
 version = "0.2.1"
-source = "git+https://github.com/min-median-max/wezterm?rev=d91c7cee1259c49d6860e6cf33d4cca606c61046#d91c7cee1259c49d6860e6cf33d4cca606c61046"
+source = "git+https://github.com/min-median-max/wezterm?rev=17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f#17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f"
 dependencies = [
  "log",
  "ordered-float",
@@ -2192,7 +2192,7 @@ dependencies = [
 [[package]]
 name = "wezterm-dynamic-derive"
 version = "0.1.1"
-source = "git+https://github.com/min-median-max/wezterm?rev=d91c7cee1259c49d6860e6cf33d4cca606c61046#d91c7cee1259c49d6860e6cf33d4cca606c61046"
+source = "git+https://github.com/min-median-max/wezterm?rev=17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f#17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2202,7 +2202,7 @@ dependencies = [
 [[package]]
 name = "wezterm-escape-parser"
 version = "0.1.0"
-source = "git+https://github.com/min-median-max/wezterm?rev=d91c7cee1259c49d6860e6cf33d4cca606c61046#d91c7cee1259c49d6860e6cf33d4cca606c61046"
+source = "git+https://github.com/min-median-max/wezterm?rev=17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f#17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f"
 dependencies = [
  "base64",
  "bitflags 2.13.0",
@@ -2228,7 +2228,7 @@ dependencies = [
 [[package]]
 name = "wezterm-input-types"
 version = "0.1.0"
-source = "git+https://github.com/min-median-max/wezterm?rev=d91c7cee1259c49d6860e6cf33d4cca606c61046#d91c7cee1259c49d6860e6cf33d4cca606c61046"
+source = "git+https://github.com/min-median-max/wezterm?rev=17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f#17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f"
 dependencies = [
  "bitflags 1.3.2",
  "euclid",
@@ -2239,7 +2239,7 @@ dependencies = [
 [[package]]
 name = "wezterm-surface"
 version = "0.1.0"
-source = "git+https://github.com/min-median-max/wezterm?rev=d91c7cee1259c49d6860e6cf33d4cca606c61046#d91c7cee1259c49d6860e6cf33d4cca606c61046"
+source = "git+https://github.com/min-median-max/wezterm?rev=17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f#17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f"
 dependencies = [
  "bitflags 2.13.0",
  "fancy-regex",
@@ -2260,7 +2260,7 @@ dependencies = [
 [[package]]
 name = "wezterm-term"
 version = "0.1.0"
-source = "git+https://github.com/min-median-max/wezterm?rev=d91c7cee1259c49d6860e6cf33d4cca606c61046#d91c7cee1259c49d6860e6cf33d4cca606c61046"
+source = "git+https://github.com/min-median-max/wezterm?rev=17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f#17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f"
 dependencies = [
  "anyhow",
  "bitflags 1.3.2",
