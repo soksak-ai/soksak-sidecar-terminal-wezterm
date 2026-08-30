@@ -5,6 +5,12 @@ documents in this directory.
 
 ## 2026-08-30
 
+- Release 0.0.38 pins common terminal Kit v0.0.34 at
+  `20fb2d73d13e5bcde592380d3052c5d2204a592f`.
+- DEC9 and DEC1001 are distinct native WezTerm engine states, exposed by provider commit
+  `17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f`; neither is inferred from another mouse mode.
+- Wheel and pointer admission use the Kit's public `mouse_reporting()` and `reports_pointer()`
+  policy helpers before the native encoder runs.
 - Wheel reports now flow through the live engine mouse mode and encoder.
 - SGR cell, default X10, and UTF-8 reports preserve both axes, repetition, position, and modifiers.
 - Alternate-screen mode 1007 emits native cursor input and refuses stale or superseded routes.

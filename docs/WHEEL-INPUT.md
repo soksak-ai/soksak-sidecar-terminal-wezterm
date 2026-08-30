@@ -4,12 +4,14 @@ The common terminal Kit converts device deltas into whole terminal-cell steps an
 scrollback. It sends this provider only the two PTY routes: mouse reporting and alternate scroll.
 The provider does not encode local scrollback.
 
-For mouse reporting, the provider sends wheel events through the live terminal model. The model's
-current mouse tracking and encoding state therefore selects SGR cell reports, default X10 reports,
-or UTF-8 extended-coordinate reports. Vertical and horizontal directions, repeated steps, cell
-position, and Shift/Alt/Control modifiers remain native model inputs; Meta maps to the model's Alt
-modifier. Decimal mouse mode 1015 is not implemented by the pinned model, and this provider does
-not add a generic encoder for it.
+For mouse reporting, the provider sends wheel events through the live terminal model. DEC9,
+DEC1000, DEC1001, DEC1002, and DEC1003 are distinct native protocol flags; the common Kit's public
+`mouse_reporting()` helper decides whether the event enters that encoder. The model's current
+coordinate encoding then selects SGR cell reports, default X10 reports, or UTF-8 extended-coordinate
+reports. Vertical and horizontal directions, repeated steps, cell position, and modifiers remain
+native model inputs; Meta maps to the model's Alt modifier, while DEC9 suppresses modifiers.
+Decimal mouse mode 1015 is not implemented by the pinned model, and this provider does not add a
+generic encoder for it.
 
 For alternate scroll, the provider requires the alternate screen and DEC mode 1007, with mouse
 reporting inactive. Each normalized step becomes one native wheel event, and the model emits the

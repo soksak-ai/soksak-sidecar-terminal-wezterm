@@ -4,12 +4,13 @@
 소유한다. 이 provider에는 PTY로 보내는 두 route, 즉 mouse report와 alternate scroll만
 전달한다. Provider는 로컬 scrollback을 인코딩하지 않는다.
 
-Mouse report route에서 provider는 live terminal model에 휠 이벤트를 전달한다. 따라서
-model의 현재 mouse tracking 및 encoding 상태가 SGR cell report, 기본 X10 report 또는 UTF-8
-확장 좌표 report를 선택한다. 수직·수평 방향, 반복 step, 셀 위치와 Shift/Alt/Control modifier는
-model의 네이티브 입력으로 유지되며 Meta는 model의 Alt modifier로 매핑한다. 고정된 model은
-decimal mouse mode 1015를 구현하지 않으며 provider도 이를 위한 generic encoder를 추가하지
-않는다.
+Mouse report route에서 provider는 live terminal model에 휠 이벤트를 전달한다. DEC9, DEC1000,
+DEC1001, DEC1002, DEC1003은 서로 다른 native protocol flag이며, 공통 Kit의 공개
+`mouse_reporting()` helper가 event를 encoder에 넣을지 결정한다. 그 뒤 model의 현재 coordinate
+encoding이 SGR cell report, 기본 X10 report 또는 UTF-8 확장 좌표 report를 선택한다. 수직·수평
+방향, 반복 step, 셀 위치와 modifier는 model의 native 입력으로 유지된다. Meta는 model의 Alt
+modifier로 매핑되며 DEC9은 modifier를 억제한다. 고정된 model은 decimal mouse mode 1015를
+구현하지 않으며 provider도 이를 위한 generic encoder를 추가하지 않는다.
 
 Alternate scroll route에서는 alternate screen과 DEC mode 1007이 켜져 있고 mouse reporting은
 꺼져 있어야 한다. 정규화된 step 하나마다 네이티브 휠 이벤트 하나를 보내며 model은 현재
