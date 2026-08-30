@@ -24,8 +24,8 @@ use std::sync::{Arc, Mutex};
 
 use soksak_kit_sidecar_terminal::mirror::TerminalEngine;
 pub use soksak_kit_sidecar_terminal::mirror::{
-    CellSide, EnginePointerInput, EngineSelectionPoint, EngineWheelInput, SelectionKind,
-    SelectionModifiers, TerminalCell as GridCell, TerminalColor as ColorSnap,
+    CellSide, EnginePointerInput, EngineSelectionPoint, EngineWheelInput, EngineWheelRoute,
+    SelectionKind, SelectionModifiers, TerminalCell as GridCell, TerminalColor as ColorSnap,
     TerminalCursorAnimation, TerminalCursorShape, TerminalCursorStyle, TerminalModes as ModeSnap,
     TerminalRgb, TerminalThemeOverrides,
 };
@@ -88,6 +88,11 @@ impl TerminalConfiguration for MirrorConfig {
     }
     fn scrollback_size(&self) -> usize {
         MIRROR_SCROLLBACK_LINES
+    }
+    /// Common input has already normalized a wheel gesture to terminal-cell steps. One native
+    /// alternate-scroll event must therefore produce one cursor-key step.
+    fn alternate_buffer_wheel_scroll_speed(&self) -> u8 {
+        1
     }
     /// 응답 writer 를 배경 스레드에 넘기지 않는다 — [`ReplyTap`] 이 응답을 받는다.
     fn threaded_writer(&self) -> bool {
@@ -324,6 +329,83 @@ impl Engine {
         self.modes.snap
     }
 
+    /// Encode a mode-routed wheel gesture through the live terminal model. The common Kit owns
+    /// device-unit normalization and normal scrollback; this seat owns only the two PTY routes.
+    /// Routing is checked again against live modes so a decision made before a mode change cannot
+    /// be encoded under a different protocol.
+    pub fn wheel_input(&mut self, input: EngineWheelInput) -> Result<Vec<u8>, String> {
+        let modes = self.modes();
+        let mouse_reporting = modes.mouse_click || modes.mouse_drag || modes.mouse_motion;
+        match input.route {
+            EngineWheelRoute::MouseReport if !mouse_reporting => {
+                return Err("WHEEL_MODE_CHANGED: mouse reporting is not active".into());
+            }
+            EngineWheelRoute::AlternateScroll if mouse_reporting => {
+                return Err(
+                    "WHEEL_MODE_CHANGED: mouse reporting supersedes alternate scroll".into(),
+                );
+            }
+            EngineWheelRoute::AlternateScroll if !self.alt_active() || !modes.alternate_scroll => {
+                return Err("WHEEL_MODE_CHANGED: alternate scroll is not active".into());
+            }
+            _ => {}
+        }
+        if input.horizontal == 0 && input.vertical == 0 {
+            return Err("WHEEL_INPUT_INVALID: wheel gesture has no terminal-cell steps".into());
+        }
+
+        let modifiers = native_mouse_modifiers(input.modifiers);
+        let start = self
+            .state
+            .replies
+            .lock()
+            .unwrap_or_else(|error| error.into_inner())
+            .len();
+        let result: Result<(), String> = (|| {
+            let mut emit = |button| {
+                self.term.mouse_event(WezMouseEvent {
+                    kind: WezMouseEventKind::Press,
+                    x: usize::from(input.col),
+                    y: i64::from(input.row),
+                    x_pixel_offset: 0,
+                    y_pixel_offset: 0,
+                    button,
+                    modifiers,
+                })
+            };
+            let vertical = if input.vertical < 0 {
+                WezMouseButton::WheelUp(1)
+            } else {
+                WezMouseButton::WheelDown(1)
+            };
+            for _ in 0..input.vertical.unsigned_abs() {
+                emit(vertical).map_err(|error| error.to_string())?;
+            }
+            let horizontal = if input.horizontal < 0 {
+                WezMouseButton::WheelLeft(1)
+            } else {
+                WezMouseButton::WheelRight(1)
+            };
+            for _ in 0..input.horizontal.unsigned_abs() {
+                emit(horizontal).map_err(|error| error.to_string())?;
+            }
+            Ok(())
+        })();
+        let mut writes = self
+            .state
+            .replies
+            .lock()
+            .unwrap_or_else(|error| error.into_inner());
+        let output = writes.drain(start..).flatten().collect::<Vec<_>>();
+        result.map_err(|error| format!("native wheel encoder failed: {error}"))?;
+        if output.is_empty() {
+            return Err(
+                "WHEEL_MODE_CHANGED: live terminal did not encode the selected route".into(),
+            );
+        }
+        Ok(output)
+    }
+
     pub fn pointer_input(&mut self, input: EnginePointerInput) -> Result<Vec<u8>, String> {
         let kind = match input.phase {
             soksak_kit_sidecar_terminal::mirror::PointerPhase::Down => WezMouseEventKind::Press,
@@ -336,16 +418,7 @@ impl Engine {
             soksak_kit_sidecar_terminal::mirror::PointerButton::Middle => WezMouseButton::Middle,
             soksak_kit_sidecar_terminal::mirror::PointerButton::Right => WezMouseButton::Right,
         };
-        let mut modifiers = WezKeyModifiers::NONE;
-        if input.modifiers.shift {
-            modifiers.insert(WezKeyModifiers::SHIFT);
-        }
-        if input.modifiers.alt || input.modifiers.meta {
-            modifiers.insert(WezKeyModifiers::ALT);
-        }
-        if input.modifiers.control {
-            modifiers.insert(WezKeyModifiers::CTRL);
-        }
+        let modifiers = native_mouse_modifiers(input.modifiers);
         let start = self
             .state
             .replies
@@ -637,12 +710,26 @@ impl TerminalEngine for Engine {
     fn selection_range(&self, line: i32) -> Option<(u16, u16)> {
         Engine::selection_range(self, line)
     }
-    fn wheel_input(&mut self, _input: EngineWheelInput) -> Result<Vec<u8>, String> {
-        Err("WezTerm wheel input is not implemented".into())
+    fn wheel_input(&mut self, input: EngineWheelInput) -> Result<Vec<u8>, String> {
+        Engine::wheel_input(self, input)
     }
     fn pointer_input(&mut self, input: EnginePointerInput) -> Result<Vec<u8>, String> {
         Engine::pointer_input(self, input)
     }
+}
+
+fn native_mouse_modifiers(modifiers: SelectionModifiers) -> WezKeyModifiers {
+    let mut native = WezKeyModifiers::NONE;
+    if modifiers.shift {
+        native.insert(WezKeyModifiers::SHIFT);
+    }
+    if modifiers.alt || modifiers.meta {
+        native.insert(WezKeyModifiers::ALT);
+    }
+    if modifiers.control {
+        native.insert(WezKeyModifiers::CTRL);
+    }
+    native
 }
 
 fn cell_of(cr: &CellRef) -> GridCell {
