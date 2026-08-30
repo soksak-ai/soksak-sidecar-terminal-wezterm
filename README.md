@@ -49,6 +49,9 @@ in the ordinary test run — it would slow the development loop — so the gate 
 budget binding rather than decorative. The contract repo's own `scripts/gate.sh` runs this one
 alongside the other units and adds the guard that only shows when they stand side by side.
 
+Native wheel ownership and its factual protocol boundary are documented in
+[English](docs/WHEEL-INPUT.md) and [한국어](docs/WHEEL-INPUT.ko.md).
+
 ## Acceptance
 
 The contract's acceptance suite belongs to the kit, not to this repo. The seven engine-neutral
