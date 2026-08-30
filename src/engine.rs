@@ -10,10 +10,12 @@
 //!   - 응답 포획: 엔진마다 다르다 — wezterm 은 생성자에 넘긴 writer 로 answerback 을 쓴다 —
 //!     [`ReplyTap`] writer 로 흡수한다. 그 writer 는 동기로 불린다(`threaded_writer` = false)
 //!     므로, feed 가 돌아온 시점에 그 feed 의 답은 이미 tap 에 들어와 있다.
-//!   - private mode 읽기: wezterm 은 대부분의 DEC private mode(app_keypad·마우스·focus 등)에
-//!     public getter 가 없다. 같은 파서(termwiz)로 mode 액션을 관찰해 [`ModeTracker`] 로
-//!     복원한다(엔진의 authoritative 파서를 재사용 — 자작 상태기계 아님). 파싱은 한 번만:
-//!     엔진이 자기 파서를 돌리는 그 한 번을 `advance_bytes_observed` 로 같이 본다.
+//!   - private mode 읽기: wezterm 은 대부분의 DEC private mode(app_keypad·focus 등)에 public
+//!     getter 가 없다. 같은 파서(termwiz)로 mode 액션을 관찰해 [`ModeTracker`] 로 복원한다
+//!     (엔진의 authoritative 파서를 재사용 — 자작 상태기계 아님). DEC9/1000/1001/1002/1003
+//!     마우스 protocol 은 예외다. provider 의 공개 `mouse_tracking_modes()` 에서 실제 엔진 상태를
+//!     읽는다. 파싱은 한 번만: 엔진이 자기 파서를 돌리는 그 한 번을
+//!     `advance_bytes_observed` 로 같이 본다.
 //!   - 그리드 읽기: wezterm 은 wide 문자를 셀 1개(width 2)로 담는다(계약 정규형 의 본체+스페이서
 //!     2셀과 다름). [`materialize_line_into`] 가 컬럼을 확장해 계약 정규형과 동형인 [`GridCell`]
 //!     로 정렬한다(wide 본체 + spacer). 라인 wrap 은 `last_cell_was_wrapped()` → 마지막 칸 wrapline.
@@ -149,9 +151,6 @@ impl ModeTracker {
                 DecPrivateModeCode::ApplicationCursorKeys => self.snap.app_cursor = set,
                 DecPrivateModeCode::AutoWrap => self.snap.line_wrap = set,
                 DecPrivateModeCode::ShowCursor => self.snap.show_cursor = set,
-                DecPrivateModeCode::MouseTracking => self.snap.mouse_click = set,
-                DecPrivateModeCode::ButtonEventMouse => self.snap.mouse_drag = set,
-                DecPrivateModeCode::AnyEventMouse => self.snap.mouse_motion = set,
                 DecPrivateModeCode::FocusTracking => self.snap.focus_in_out = set,
                 DecPrivateModeCode::Utf8Mouse => self.snap.utf8_mouse = set,
                 DecPrivateModeCode::SGRMouse => self.snap.sgr_mouse = set,
@@ -326,7 +325,14 @@ impl Engine {
     }
 
     pub fn modes(&self) -> ModeSnap {
-        self.modes.snap
+        let mut modes = self.modes.snap;
+        let mouse = self.term.mouse_tracking_modes();
+        modes.mouse_x10 = mouse.x10;
+        modes.mouse_click = mouse.normal;
+        modes.mouse_highlight = mouse.highlight;
+        modes.mouse_drag = mouse.button_event;
+        modes.mouse_motion = mouse.any_event;
+        modes
     }
 
     /// Encode a mode-routed wheel gesture through the live terminal model. The common Kit owns
@@ -335,7 +341,7 @@ impl Engine {
     /// be encoded under a different protocol.
     pub fn wheel_input(&mut self, input: EngineWheelInput) -> Result<Vec<u8>, String> {
         let modes = self.modes();
-        let mouse_reporting = modes.mouse_click || modes.mouse_drag || modes.mouse_motion;
+        let mouse_reporting = modes.mouse_reporting();
         match input.route {
             EngineWheelRoute::MouseReport if !mouse_reporting => {
                 return Err("WHEEL_MODE_CHANGED: mouse reporting is not active".into());
@@ -407,6 +413,9 @@ impl Engine {
     }
 
     pub fn pointer_input(&mut self, input: EnginePointerInput) -> Result<Vec<u8>, String> {
+        if !self.modes().reports_pointer(input.phase, input.button) {
+            return Err("POINTER_MODE_CHANGED: pointer phase is not reported by live modes".into());
+        }
         let kind = match input.phase {
             soksak_kit_sidecar_terminal::mirror::PointerPhase::Down => WezMouseEventKind::Press,
             soksak_kit_sidecar_terminal::mirror::PointerPhase::Up => WezMouseEventKind::Release,
