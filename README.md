@@ -42,6 +42,15 @@ make attest TARGET=aarch64-apple-darwin OUT=/absolute/wezterm-release
 `make lock` is the only owner operation that projects changed Cargo declarations into
 `Cargo.lock`. Normal build and verification remain `--locked`.
 
+Two clean checkouts of the same commit must also produce the same complete release directory:
+
+```sh
+scripts/check-cross-root-release.sh /absolute/left /absolute/right
+```
+
+The command rejects symlinks, compares the complete file set, and then compares every byte. This
+includes the packaged Mach-O binary and therefore its load commands and UUID.
+
 **This unit passes when `scripts/gate.sh` passes, and by no other means.** One command, all of
 it blocking: the seven fixtures against the contract's declared reference states, the unit tests, and
 the performance budgets (SPEC.md §14.2). The benchmark is ignored
@@ -70,6 +79,7 @@ nowhere, so its Apache-2.0 does not reach this unit either.
 ## Dependency identity
 
 The owner pins `https://github.com/min-median-max/wezterm` commit
-`d91c7cee1259c49d6860e6cf33d4cca606c61046` in `Cargo.toml`. No local checkout or path dependency
-is part of the build. Current qualification is determined only by the owner `make verify` gate
-above, not by a copied pass count in this document.
+`17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f` and common terminal Kit v0.0.34 commit
+`20fb2d73d13e5bcde592380d3052c5d2204a592f` in `Cargo.toml`. No local checkout or path dependency is
+part of the build. Current qualification is determined only by the owner `make verify` gate above,
+not by a copied pass count in this document.

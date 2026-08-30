@@ -11,6 +11,8 @@ documents in this directory.
   `17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f`; neither is inferred from another mouse mode.
 - Wheel and pointer admission use the Kit's public `mouse_reporting()` and `reports_pointer()`
   policy helpers before the native encoder runs.
+- Cross-root release verification compares the complete release file set and every shipped byte,
+  including Mach-O load commands and UUID.
 - Wheel reports now flow through the live engine mouse mode and encoder.
 - SGR cell, default X10, and UTF-8 reports preserve both axes, repetition, position, and modifiers.
 - Alternate-screen mode 1007 emits native cursor input and refuses stale or superseded routes.
