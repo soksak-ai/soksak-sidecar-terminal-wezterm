@@ -10,6 +10,9 @@ if (manifest.processRole !== "sidecar-terminal-wezterm") throw new Error("Sideca
 const targets = JSON.parse(read("release/targets.json"));
 const makefile = read("Makefile");
 const stage = read("scripts/stage-built.sh");
+const reproducibilityPath = path.join(root, "scripts/check-cross-root-release.sh");
+if (!fs.existsSync(reproducibilityPath)) throw new Error("cross-root release comparison command is missing");
+const reproducibility = fs.readFileSync(reproducibilityPath, "utf8");
 const ownerPath = `soksak-sidecars/${manifest.id}`;
 const requireText = (value, label) => { if (!workflow.includes(value)) throw new Error(`release workflow is missing ${label}: ${value}`); };
 for (const target of ["preflight", "lock", "prepare", "build", "stage", "verify", "require-tooling", "require-out", "release", "attest"]) if (!new RegExp(`^${target}:`, "m").test(makefile)) throw new Error(`Makefile target is missing: ${target}`);
@@ -28,6 +31,8 @@ requireText(`working-directory: ${ownerPath}`, "owner working directory");
 requireText("choco install make --version=4.4.1", "Windows Make environment");
 if (!stage.includes('staged=$name$ext')) throw new Error("stage-built does not select the target executable name");
 if (!stage.includes("absolute candidate output")) throw new Error("stage-built does not permit isolated absolute output");
+for (const value of ["CROSS_ROOT_RELEASE_FILE_SET_MISMATCH", "CROSS_ROOT_RELEASE_BYTE_MISMATCH", "CROSS_ROOT_RELEASE_REPRODUCIBLE"]) if (!reproducibility.includes(value)) throw new Error(`cross-root release comparison is missing: ${value}`);
+if (!read("README.md").includes("scripts/check-cross-root-release.sh /absolute/left /absolute/right")) throw new Error("README must document cross-root release comparison");
 for (const { target, runner } of targets) { requireText(`target: ${target}`, "release target"); requireText(`runner: ${runner}`, "release runner"); }
 for (const match of workflow.matchAll(/^\s*-?\s*uses:\s*([^\s#]+)/gm)) if (!/^[^@\s]+@[a-f0-9]{40}$/.test(match[1])) throw new Error(`workflow action is not commit-pinned: ${match[1]}`);
 for (const obsolete of ["stage.sh", "export PATH=", "tar -czf", "SOKSAK_PTYD_BIN", "SOKSAK_CORE_WORKTREE"]) if (workflow.includes(obsolete)) throw new Error(`workflow retains obsolete behavior: ${obsolete}`);
