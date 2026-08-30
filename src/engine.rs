@@ -24,10 +24,10 @@ use std::sync::{Arc, Mutex};
 
 use soksak_kit_sidecar_terminal::mirror::TerminalEngine;
 pub use soksak_kit_sidecar_terminal::mirror::{
-    EnginePointerInput, EngineSelectionPoint, EngineWheelInput, SelectionKind, SelectionModifiers,
-    TerminalCell as GridCell, TerminalColor as ColorSnap, TerminalCursorAnimation,
-    TerminalCursorShape, TerminalCursorStyle, TerminalModes as ModeSnap, TerminalRgb,
-    TerminalThemeOverrides,
+    CellSide, EnginePointerInput, EngineSelectionPoint, EngineWheelInput, SelectionKind,
+    SelectionModifiers, TerminalCell as GridCell, TerminalColor as ColorSnap,
+    TerminalCursorAnimation, TerminalCursorShape, TerminalCursorStyle, TerminalModes as ModeSnap,
+    TerminalRgb, TerminalThemeOverrides,
 };
 use termwiz::cell::{CellAttributes, Intensity, Underline};
 use termwiz::color::ColorAttribute;
@@ -177,6 +177,14 @@ pub struct Engine {
     modes: ModeTracker,
     cols: u16,
     rows: u16,
+    selection: Option<EngineSelection>,
+}
+
+#[derive(Clone, Copy)]
+struct EngineSelection {
+    kind: SelectionKind,
+    anchor: EngineSelectionPoint,
+    focus: EngineSelectionPoint,
 }
 
 impl Engine {
@@ -201,6 +209,7 @@ impl Engine {
             modes: ModeTracker::new(),
             cols,
             rows,
+            selection: None,
         }
     }
 
@@ -391,6 +400,137 @@ impl Engine {
         }
         materialize_line_into(screen.line(idx as usize), cols, buf);
     }
+
+    fn selection_boundary(point: EngineSelectionPoint) -> (i32, u16) {
+        (
+            point.line,
+            point
+                .col
+                .saturating_add(u16::from(point.side == CellSide::Right)),
+        )
+    }
+
+    fn selection_bounds(&self) -> Option<(SelectionKind, (i32, u16), (i32, u16))> {
+        let selection = self.selection?;
+        let mut start = Self::selection_boundary(selection.anchor);
+        let mut end = Self::selection_boundary(selection.focus);
+        if end < start {
+            std::mem::swap(&mut start, &mut end);
+        }
+        Some((selection.kind, start, end))
+    }
+
+    pub fn selection_begin(
+        &mut self,
+        kind: SelectionKind,
+        point: EngineSelectionPoint,
+        _modifiers: SelectionModifiers,
+    ) -> Result<(), String> {
+        if kind == SelectionKind::Semantic {
+            return Err("WezTerm semantic selection is not implemented by the engine".into());
+        }
+        if kind == SelectionKind::Extend
+            && let Some(selection) = self.selection.as_mut()
+        {
+            selection.focus = point;
+            return Ok(());
+        }
+        self.selection = Some(EngineSelection {
+            kind,
+            anchor: point,
+            focus: point,
+        });
+        Ok(())
+    }
+
+    pub fn selection_update(
+        &mut self,
+        point: EngineSelectionPoint,
+        _modifiers: SelectionModifiers,
+    ) -> Result<(), String> {
+        let selection = self
+            .selection
+            .as_mut()
+            .ok_or("no active WezTerm selection")?;
+        selection.focus = point;
+        Ok(())
+    }
+
+    pub fn selection_clear(&mut self) {
+        self.selection = None;
+    }
+
+    fn selected_line_text(&self, line: i32, left: u16, right: u16) -> String {
+        let cells = self.line_cells(line);
+        let left = usize::from(left.min(self.cols));
+        let right = usize::from(right.min(self.cols));
+        let mut text = String::new();
+        for cell in cells
+            .iter()
+            .take(right)
+            .skip(left)
+            .filter(|cell| !cell.spacer)
+        {
+            text.push(cell.ch);
+            text.extend(cell.zerowidth.iter());
+        }
+        text
+    }
+
+    pub fn selection_text(&self) -> Option<String> {
+        let (kind, mut start, mut end) = self.selection_bounds()?;
+        if kind == SelectionKind::Line {
+            start.1 = 0;
+            end.1 = self.cols;
+        }
+        if kind == SelectionKind::Block {
+            let left = start.1.min(end.1);
+            let right = start.1.max(end.1);
+            return Some(
+                (start.0..=end.0)
+                    .map(|line| {
+                        self.selected_line_text(line, left, right)
+                            .trim_end()
+                            .to_string()
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n"),
+            );
+        }
+        let mut rows = Vec::new();
+        for line in start.0..=end.0 {
+            let left = if line == start.0 { start.1 } else { 0 };
+            let right = if line == end.0 { end.1 } else { self.cols };
+            rows.push(
+                self.selected_line_text(line, left, right)
+                    .trim_end()
+                    .to_string(),
+            );
+        }
+        Some(rows.join("\n"))
+    }
+
+    pub fn selection_range(&self, line: i32) -> Option<(u16, u16)> {
+        let (kind, mut start, mut end) = self.selection_bounds()?;
+        if line < start.0 || line > end.0 {
+            return None;
+        }
+        if kind == SelectionKind::Line {
+            return Some((0, self.cols.saturating_sub(1)));
+        }
+        if kind == SelectionKind::Block {
+            let left = start.1.min(end.1);
+            let right = start.1.max(end.1);
+            return (right > left).then_some((left, right.saturating_sub(1)));
+        }
+        if line != start.0 {
+            start.1 = 0;
+        }
+        if line != end.0 {
+            end.1 = self.cols;
+        }
+        (end.1 > start.1).then_some((start.1, end.1.saturating_sub(1)))
+    }
 }
 
 fn term_size(cols: u16, rows: u16) -> TerminalSize {
@@ -475,25 +615,27 @@ impl TerminalEngine for Engine {
     }
     fn selection_begin(
         &mut self,
-        _kind: SelectionKind,
-        _point: EngineSelectionPoint,
-        _modifiers: SelectionModifiers,
+        kind: SelectionKind,
+        point: EngineSelectionPoint,
+        modifiers: SelectionModifiers,
     ) -> Result<(), String> {
-        Err("WezTerm selection input is not implemented".into())
+        Engine::selection_begin(self, kind, point, modifiers)
     }
     fn selection_update(
         &mut self,
-        _point: EngineSelectionPoint,
-        _modifiers: SelectionModifiers,
+        point: EngineSelectionPoint,
+        modifiers: SelectionModifiers,
     ) -> Result<(), String> {
-        Err("WezTerm selection input is not implemented".into())
+        Engine::selection_update(self, point, modifiers)
     }
-    fn selection_clear(&mut self) {}
+    fn selection_clear(&mut self) {
+        Engine::selection_clear(self)
+    }
     fn selection_text(&self) -> Option<String> {
-        None
+        Engine::selection_text(self)
     }
-    fn selection_range(&self, _line: i32) -> Option<(u16, u16)> {
-        None
+    fn selection_range(&self, line: i32) -> Option<(u16, u16)> {
+        Engine::selection_range(self, line)
     }
     fn wheel_input(&mut self, _input: EngineWheelInput) -> Result<Vec<u8>, String> {
         Err("WezTerm wheel input is not implemented".into())
