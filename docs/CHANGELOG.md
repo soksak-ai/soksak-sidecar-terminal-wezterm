@@ -5,6 +5,7 @@ documents in this directory.
 
 ## 2026-08-31
 
+- Release 0.0.40 uses the exact SDK 0.0.20 release closure for both local and public owner proofs.
 - Release 0.0.39 assigns the rewritten source commit a new immutable release identity; 0.0.38
   remains bound to its original source commit and bytes.
 
