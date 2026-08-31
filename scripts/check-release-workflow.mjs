@@ -22,7 +22,7 @@ if (!/^STAGE \?= dist$/m.test(makefile) || /^OUT \?= dist$/m.test(makefile)) thr
 for (const value of ["command -v soksak-sdk", "SDK_VERSION", "soksak-sdk pack-target", "soksak-sdk package", "soksak-sdk attest"]) if (!makefile.includes(value)) throw new Error(`Makefile release boundary is missing: ${value}`);
 if (!read("README.md").includes("make attest TARGET=") || !read("README.md").includes("OUT=/absolute/")) throw new Error("README must document owner attestation");
 if (!/^benchmark:/m.test(makefile) || /--test bench|performance budget/.test(read("scripts/gate.sh"))) throw new Error("benchmark ownership is not separated from verification");
-for (const value of ["spec_url:", "spec_sha256:", "${{ inputs.spec_url }}", "${{ inputs.spec_sha256 }}"]) requireText(value, "release-train input");
+for (const value of ["sdk_archive_url:", "sdk_archive_sha256:", "sdk_release_url:", "sdk_release_sha256:", "${{ inputs.sdk_archive_url }}", "${{ inputs.sdk_release_url }}", "$RUNNER_TEMP/soksak-sdk", "soksak-sdk prepare", ".dependencies/soksak-spec/release-template"]) requireText(value, "release-train input");
 requireText('make verify TARGET="${{ matrix.target }}"', "owner Make verification");
 requireText('make stage TARGET="${{ matrix.target }}" STAGE=dist', "owner Make staging");
 requireText("release-template/sidecar/pack-target.mjs", "canonical target packer");
@@ -35,5 +35,5 @@ for (const value of ["CROSS_ROOT_RELEASE_FILE_SET_MISMATCH", "CROSS_ROOT_RELEASE
 if (!read("README.md").includes("scripts/check-cross-root-release.sh /absolute/left /absolute/right")) throw new Error("README must document cross-root release comparison");
 for (const { target, runner } of targets) { requireText(`target: ${target}`, "release target"); requireText(`runner: ${runner}`, "release runner"); }
 for (const match of workflow.matchAll(/^\s*-?\s*uses:\s*([^\s#]+)/gm)) if (!/^[^@\s]+@[a-f0-9]{40}$/.test(match[1])) throw new Error(`workflow action is not commit-pinned: ${match[1]}`);
-for (const obsolete of ["stage.sh", "export PATH=", "tar -czf", "SOKSAK_PTYD_BIN", "SOKSAK_CORE_WORKTREE"]) if (workflow.includes(obsolete)) throw new Error(`workflow retains obsolete behavior: ${obsolete}`);
+for (const obsolete of ["stage.sh", "export PATH=", "tar -czf", "SOKSAK_PTYD_BIN", "SOKSAK_CORE_WORKTREE", "spec_url:", "spec_sha256:", ".dependency/spec-package"]) if (workflow.includes(obsolete)) throw new Error(`workflow retains obsolete behavior: ${obsolete}`);
 console.log("release workflow contract: passed");
