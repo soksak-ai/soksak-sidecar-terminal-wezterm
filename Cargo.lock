@@ -1723,7 +1723,7 @@ dependencies = [
 [[package]]
 name = "soksak-kit-sidecar-terminal"
 version = "0.0.35"
-source = "git+https://github.com/soksak-ai/soksak-kit-sidecar-terminal?rev=8d1ef28#8d1ef287cfdfa9d2d09f5cba1946f33c67589163"
+source = "git+https://github.com/soksak-ai/soksak-kit-sidecar-terminal?rev=8d1ef287cfdfa9d2d09f5cba1946f33c67589163#8d1ef287cfdfa9d2d09f5cba1946f33c67589163"
 dependencies = [
  "aes-gcm",
  "base64",
