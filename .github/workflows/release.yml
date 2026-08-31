@@ -46,6 +46,7 @@ jobs:
           path: soksak-sidecars/soksak-sidecar-terminal-wezterm
           persist-credentials: false
       - name: Materialize the exact Component Tooling release
+        id: tooling
         run: |
           case "${{ inputs.sdk_archive_url }}" in
             https://github.com/soksak-ai/soksak-sdk/releases/download/v*/soksak-sdk-*-any.tgz) ;;
@@ -58,17 +59,18 @@ jobs:
           mkdir -p "$RUNNER_TEMP/soksak-sdk"
           curl -fsSL "${{ inputs.sdk_archive_url }}" -o "$RUNNER_TEMP/soksak-sdk.tgz"
           curl -fsSL "${{ inputs.sdk_release_url }}" -o "$RUNNER_TEMP/soksak-sdk-release.json"
-          archive_sha="$(if command -v sha256sum >/dev/null 2>&1; then sha256sum "$RUNNER_TEMP/soksak-sdk.tgz"; else shasum -a 256 "$RUNNER_TEMP/soksak-sdk.tgz"; fi | awk '{print $1}')"
-          release_sha="$(if command -v sha256sum >/dev/null 2>&1; then sha256sum "$RUNNER_TEMP/soksak-sdk-release.json"; else shasum -a 256 "$RUNNER_TEMP/soksak-sdk-release.json"; fi | awk '{print $1}')"
+          archive_sha="$(node -e 'const fs=require("fs"),crypto=require("crypto");process.stdout.write(crypto.createHash("sha256").update(fs.readFileSync(process.argv[1])).digest("hex"))' "$RUNNER_TEMP/soksak-sdk.tgz")"
+          release_sha="$(node -e 'const fs=require("fs"),crypto=require("crypto");process.stdout.write(crypto.createHash("sha256").update(fs.readFileSync(process.argv[1])).digest("hex"))' "$RUNNER_TEMP/soksak-sdk-release.json")"
           test "$archive_sha" = "${{ inputs.sdk_archive_sha256 }}"
           test "$release_sha" = "${{ inputs.sdk_release_sha256 }}"
           test "$(node -e 'const fs=require("fs");process.stdout.write(JSON.parse(fs.readFileSync(process.argv[1])).artifacts[0].sha256)' "$RUNNER_TEMP/soksak-sdk-release.json")" = "$archive_sha"
           tar -xzf "$RUNNER_TEMP/soksak-sdk.tgz" -C "$RUNNER_TEMP/soksak-sdk" --strip-components=1
           cp "$RUNNER_TEMP/soksak-sdk-release.json" "$RUNNER_TEMP/soksak-sdk/release.json"
-          test -z "$(find "$RUNNER_TEMP/soksak-sdk" -type l -print -quit)"
+          node -e 'const fs=require("fs"),path=require("path");const walk=p=>{for(const name of fs.readdirSync(p)){const q=path.join(p,name),s=fs.lstatSync(q);if(s.isSymbolicLink())throw new Error(`SDK archive contains symbolic link: ${q}`);if(s.isDirectory())walk(q)}};walk(process.argv[1])' "$RUNNER_TEMP/soksak-sdk"
+          echo "node=$(node -p 'require(process.argv[1]).engines.node' "$RUNNER_TEMP/soksak-sdk/package.json")" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
-          node-version-file: ${{ runner.temp }}/soksak-sdk/package.json
+          node-version: ${{ steps.tooling.outputs.node }}
       - name: Prepare the exact Component Tooling closure
         run: |
           "$RUNNER_TEMP/soksak-sdk/bin/soksak-sdk" prepare
@@ -119,6 +121,7 @@ jobs:
           path: soksak-sidecars/soksak-sidecar-terminal-wezterm
           persist-credentials: false
       - name: Materialize the exact Component Tooling release
+        id: tooling
         run: |
           case "${{ inputs.sdk_archive_url }}" in
             https://github.com/soksak-ai/soksak-sdk/releases/download/v*/soksak-sdk-*-any.tgz) ;;
@@ -131,15 +134,18 @@ jobs:
           mkdir -p "$RUNNER_TEMP/soksak-sdk"
           curl -fsSL "${{ inputs.sdk_archive_url }}" -o "$RUNNER_TEMP/soksak-sdk.tgz"
           curl -fsSL "${{ inputs.sdk_release_url }}" -o "$RUNNER_TEMP/soksak-sdk-release.json"
-          test "$(sha256sum "$RUNNER_TEMP/soksak-sdk.tgz" | awk '{print $1}')" = "${{ inputs.sdk_archive_sha256 }}"
-          test "$(sha256sum "$RUNNER_TEMP/soksak-sdk-release.json" | awk '{print $1}')" = "${{ inputs.sdk_release_sha256 }}"
+          archive_sha="$(node -e 'const fs=require("fs"),crypto=require("crypto");process.stdout.write(crypto.createHash("sha256").update(fs.readFileSync(process.argv[1])).digest("hex"))' "$RUNNER_TEMP/soksak-sdk.tgz")"
+          release_sha="$(node -e 'const fs=require("fs"),crypto=require("crypto");process.stdout.write(crypto.createHash("sha256").update(fs.readFileSync(process.argv[1])).digest("hex"))' "$RUNNER_TEMP/soksak-sdk-release.json")"
+          test "$archive_sha" = "${{ inputs.sdk_archive_sha256 }}"
+          test "$release_sha" = "${{ inputs.sdk_release_sha256 }}"
           test "$(node -e 'const fs=require("fs");process.stdout.write(JSON.parse(fs.readFileSync(process.argv[1])).artifacts[0].sha256)' "$RUNNER_TEMP/soksak-sdk-release.json")" = "${{ inputs.sdk_archive_sha256 }}"
           tar -xzf "$RUNNER_TEMP/soksak-sdk.tgz" -C "$RUNNER_TEMP/soksak-sdk" --strip-components=1
           cp "$RUNNER_TEMP/soksak-sdk-release.json" "$RUNNER_TEMP/soksak-sdk/release.json"
-          test -z "$(find "$RUNNER_TEMP/soksak-sdk" -type l -print -quit)"
+          node -e 'const fs=require("fs"),path=require("path");const walk=p=>{for(const name of fs.readdirSync(p)){const q=path.join(p,name),s=fs.lstatSync(q);if(s.isSymbolicLink())throw new Error(`SDK archive contains symbolic link: ${q}`);if(s.isDirectory())walk(q)}};walk(process.argv[1])' "$RUNNER_TEMP/soksak-sdk"
+          echo "node=$(node -p 'require(process.argv[1]).engines.node' "$RUNNER_TEMP/soksak-sdk/package.json")" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
-          node-version-file: ${{ runner.temp }}/soksak-sdk/package.json
+          node-version: ${{ steps.tooling.outputs.node }}
       - name: Prepare the exact Component Tooling closure
         run: "$RUNNER_TEMP/soksak-sdk/bin/soksak-sdk prepare"
       - id: identity
