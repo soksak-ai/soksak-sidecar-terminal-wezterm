@@ -24,6 +24,7 @@ stage: build
 	@scripts/stage-built.sh '$(STAGE)' '$(TARGET)'
 
 verify: build
+	@node scripts/check-reference-language.mjs
 	@node scripts/check-release-workflow.mjs
 	@scripts/gate.sh '$(TARGET)'
 

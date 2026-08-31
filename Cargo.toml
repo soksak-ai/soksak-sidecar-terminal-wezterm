@@ -24,18 +24,15 @@ path = "src/main.rs"
 
 [dependencies]
 # Restore engine — the wezterm-term VT model (parser + grid + scrollback + modes),
-# the sole engine seat behind the engine module. The dependency declarations below pin one
-# immutable MIT-licensed source revision
+# the sole engine seat behind the engine module. This unit pins wezterm-term, wezterm-surface, and termwiz to one immutable MIT-licensed source revision
 # (© Wez Furlong; attribution in THIRD-PARTY-NOTICES).
-# The pinned revision provides the owner-required capabilities:
-# a headless embedding API (threaded_writer opt-out,
-# advance_bytes_observed, screen line() accessor); wrap-before-placement for a double-width grapheme
-# when one column remains;
-# inline true-color storage by value;
-# carries true color by value instead of a per-cell heap allocation; and explicit OSC color
-# override state that remains distinct from the effective palette; and native, distinct DEC9
-# and DEC1001 mouse protocol state. term and termwiz come
-# the same revision, so the cell/color/attribute and Action types unify.
+#
+# The pinned revision provides the owner-required headless API (threaded_writer opt-out,
+# advance_bytes_observed, screen line() accessor); wraps a double-width grapheme before placement when only one column remains;
+# stores true color inline by value; exposes explicit OSC color-override state separately from
+# the effective palette; and exposes native, distinct DEC 9 and DEC 1001 mouse-protocol state.
+# All three dependencies use the same revision, so their cell, color, attribute, and Action types
+# unify.
 wezterm-term = { git = "https://github.com/min-median-max/wezterm", rev = "17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f" }
 wezterm-surface = { git = "https://github.com/min-median-max/wezterm", rev = "17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f" }
 termwiz = { git = "https://github.com/min-median-max/wezterm", rev = "17c7f4aa77e43ad14459cfe6f5da76b1a0a57a2f" }
