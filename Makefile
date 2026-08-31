@@ -1,6 +1,6 @@
 SHELL := /bin/sh
 STAGE ?= dist
-SDK_VERSION := 0.0.18
+SDK_VERSION := 0.0.20
 
 .PHONY: require-target preflight lock prepare build stage verify benchmark require-tooling require-out release attest
 
