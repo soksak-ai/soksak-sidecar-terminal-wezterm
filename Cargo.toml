@@ -60,7 +60,7 @@ windows-sys = { version = "0.59", features = ["Win32_System_Console", "Win32_Fou
 # The contract and its acceptance suite: the corpus, the declared reference states, and the assertions.
 # It has no engine of its own — the standard is the declared screen state, not what any
 # implementation does. Dev-only: nothing from it ships.
-soksak-contract-terminal = { git = "https://github.com/soksak-ai/soksak-contract-terminal", rev = "e2d60b034148fdf6b43637bba41e9a068515c0a8" }
+soksak-contract-terminal = { git = "https://github.com/soksak-ai/soksak-contract-terminal", rev = "4acb6bc296332daac35cf58c3a846c3b18748301" }
 
 # This repository is its own Cargo workspace.
 [workspace]
