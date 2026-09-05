@@ -1,6 +1,6 @@
 {
   "id": "soksak-sidecar-terminal-wezterm",
-  "version": "0.0.42",
+  "version": "0.0.43",
   "processRole": "sidecar-terminal-wezterm",
   "interface": [
     {

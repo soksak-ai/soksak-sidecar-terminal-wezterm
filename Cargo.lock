@@ -1704,7 +1704,7 @@ dependencies = [
 [[package]]
 name = "soksak-contract-surface"
 version = "0.0.9"
-source = "git+https://github.com/soksak-ai/soksak-contract-surface?rev=f3c3b22#f3c3b22f780850cb222e5eeb862eff59518766eb"
+source = "git+https://github.com/soksak-ai/soksak-contract-surface?rev=dcccf07fff8ccbb8822d9128b5ea23b536401c4d#dcccf07fff8ccbb8822d9128b5ea23b536401c4d"
 dependencies = [
  "base64",
  "serde",
@@ -1722,8 +1722,8 @@ dependencies = [
 
 [[package]]
 name = "soksak-kit-sidecar-terminal"
-version = "0.0.35"
-source = "git+https://github.com/soksak-ai/soksak-kit-sidecar-terminal?rev=8d1ef287cfdfa9d2d09f5cba1946f33c67589163#8d1ef287cfdfa9d2d09f5cba1946f33c67589163"
+version = "0.0.36"
+source = "git+https://github.com/soksak-ai/soksak-kit-sidecar-terminal?rev=97c20b025b042f0de9798a7c57d8c38200886e7d#97c20b025b042f0de9798a7c57d8c38200886e7d"
 dependencies = [
  "aes-gcm",
  "base64",
@@ -1735,11 +1735,12 @@ dependencies = [
  "sha2",
  "soksak-contract-control",
  "soksak-contract-surface",
+ "soksak-contract-terminal",
 ]
 
 [[package]]
 name = "soksak-sidecar-terminal-wezterm"
-version = "0.0.42"
+version = "0.0.43"
 dependencies = [
  "base64",
  "interprocess",
