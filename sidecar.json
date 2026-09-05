@@ -1,6 +1,6 @@
 {
   "id": "soksak-sidecar-terminal-wezterm",
-  "version": "0.0.41",
+  "version": "0.0.42",
   "processRole": "sidecar-terminal-wezterm",
   "interface": [
     {
@@ -12,6 +12,6 @@
       "version": "0.0.2"
     }
   ],
-  "runtimeDependencies": {"sidecars": [{"id": "soksak-sidecar-pty", "version": "0.0.23"}]},
+  "runtimeDependencies": {"sidecars": [{"id": "soksak-sidecar-pty", "version": "0.0.24"}]},
   "process": "dist/soksak-sidecar-terminal-wezterm"
 }
